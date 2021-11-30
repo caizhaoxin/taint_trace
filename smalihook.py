@@ -1,8 +1,19 @@
 import os  
-import untransfer
   
+  
+#使用register_list来管理寄存器
+register_list = []
+register_index = -1
+
 class ParserError(Exception):  
     pass  
+
+#每次都获取一个寄存器，循环利用
+def get_register():
+    global register_index
+    register_index += 1
+    register_index %= len(register_list)
+    return register_list[register_index]
 
 
 #计算函数传入参数的个数
@@ -35,8 +46,27 @@ def count_arguments(arguments):
                 
     return argumen_count
 
+
+#生成输出的代码
+def generate_log_parameters(argument_count):
+    inject_code = []
+    inject_code.append("\n")
+    for i in range(0, argument_count):
+        #获取一个寄存器
+        current_register = get_register()
+        #当前参数的符号是pi
+        current_parameter = "p" + str(i + 1)
+        
+        #生成log参数的代码...
+    
+    
+    inject_code.append("\n")
+    return inject_code
+    
+
 #   
 def inject_code_to_method_section(method_section):  
+    #print(method_section)
     #   
     if method_section[0].find("static constructor") != -1:  
         return method_section  
@@ -47,11 +77,6 @@ def inject_code_to_method_section(method_section):
     if method_section[0].find("abstract") != -1:  
         return method_section  
     #   
-    log_paramters = [  
-        '\n',  
-        '    invoke-static {}, Lcom/hook/testsmali/InjectLog;->PrintFunc()V\n',  
-        '\n'  
-    ]
     
     
     
@@ -81,23 +106,31 @@ def inject_code_to_method_section(method_section):
 
     # 这里是插桩的逻辑
     for i in range(0, len(method_section)):  
-        #print(method_section[i])
+        print(method_section[i])
+        #记录是否要开始插桩
+        start_inject = False
         #找到配置寄存器的个数
         if method_section[i].find(".locals") != -1:
+            #开始插桩
+            start_inject = True
             locals_line = method_section[i].split(" ")
             local_count = locals_line[len(locals_line) - 1]
             local_count = int(local_count)
             #改为14
             new_local_count = 14
             method_section[i] = "    .locals " + str(new_local_count) + "\n"
-            #使用register_list来管理寄存器
-            register_list = []
-            #看看寄存器是否被占用了
-            is_use_list = []
+            
+            #生成可用的寄存器
+            global register_list
             for j in range(local_count, new_local_count - 1):
                 register_list.append("v" + str(j))
-                is_use_list.append(False)
                 
+            continue
+        
+        if start_inject:
+            #开始插桩...
+            return
+            
                 
             
             
