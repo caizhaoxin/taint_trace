@@ -1,0 +1,1 @@
+hook and log the running data in smali code level
