@@ -15,8 +15,38 @@ def get_register():
     register_index %= len(register_list)
     return register_list[register_index]
 
+#把自己定义好的Log类插入到App中
+def insert_mylog(package_name):
+    root_path = os.path.join(package_name, 'smali')
+    #判断是否存在当前文件夹pacage_name/smali
+    is_exist_folder = os.path.exists(root_path)
+    
+    if is_exist_folder:
+        #创建文件夹package_name/samli/gosec/mylog
+        mylog_location = os.path.join(root_path, 'gosec', 'mylog')
+        if not os.path.exists(mylog_location):
+            os.makedirs(mylog_location)
+        print("successful!")
+        
+        #把smali写入到gosec/mylog文件夹下
+        mylog_smali = os.path.join(mylog_location, 'Log.smali')
+        #需要把已经写好的smali文件放入到当前的文件夹下
+        current_smali = os.path.join(os.getcwd(), 'Log.smali')
+        
+        r = open(current_smali, 'r')
+        lines = r.readlines()
+        
+        f = open(mylog_smali, 'w')
+        f.writelines(lines)
+        
+        r.close()
+        f.close()
+        
+    else:
+        print(root_path + 'is not exist')
 
-#计算函数传入参数的个数
+
+#计算函数传入参数的个数,传入的格式为([BLjava/io/InputStream;Ljava/io/OutputStream;)
 def count_arguments(arguments):
     arguments = arguments[1:len(arguments) - 1]
     argumen_count = 0
@@ -122,7 +152,7 @@ def inject_code_to_method_section(method_section):
             
             #生成可用的寄存器
             global register_list
-            for j in range(local_count, new_local_count - 1):
+            for j in range(local_count, new_local_count):
                 register_list.append("v" + str(j))
                 
             continue
@@ -196,4 +226,5 @@ def main():
   
   
 if __name__ == '__main__':  
-    main()  
+    #main()
+    insert_mylog("demo")  
