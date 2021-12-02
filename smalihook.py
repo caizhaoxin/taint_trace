@@ -292,21 +292,42 @@ def read_flame_function_list():
     
 
 def main():  
-    i = 0
     
     read_flame_function_list()
     global target_class
     global target_method
     
-    walker = os.walk("./")  
-    for root, directory, files in walker:  
-        for file_name in files:  
-            file_path = os.path.join(root, file_name)
-            print(file_path)  
-            file = open(file_path,'r',encoding='UTF-8')  
-            lines = file.readlines()  
-            file.close()
-            new_code = inject_log_code(lines)  
+    #这里后面需要修改对应的apk名字
+    root_path = os.path.join('.', 'demo')
+    root_dirs = os.listdir(root_path)
+    smali_dirs = []
+    print(root_dirs)
+    #找到apk目录下存在的smali文件夹
+    for dirs in root_dirs:
+        if 'smali' in dirs:
+            smali_dirs.append(os.path.join(root_path, dirs))
+    
+    print(smali_dirs)     
+    for i in range(0, len(target_class)):
+        for j in range(0, len(smali_dirs)):
+            class_smali_path = os.path.join(smali_dirs[j], target_class[i] + '.smali')
+            #找到了文件
+            if os.path.exists(class_smali_path):
+                
+                #这里找到了class和method所在的文件,可以进行接下来的读操作
+                print(class_smali_path)
+                
+                #跳出循环
+                break
+    # walker = os.walk("./")  
+    # for root, directory, files in walker:  
+    #     for file_name in files:  
+    #         file_path = os.path.join(root, file_name)
+    #         print(file_path)  
+    #         file = open(file_path,'r',encoding='UTF-8')  
+    #         lines = file.readlines()  
+    #         file.close()
+    #         new_code = inject_log_code(lines)  
             # file = open(file_path, "w")  
             # file.writelines(new_code)  
             # file.close()  
@@ -317,4 +338,6 @@ def main():
   
 if __name__ == '__main__':  
     read_flame_function_list()
+    main()
+    #read_flame_function_list()
     #insert_mylog("demo")  
