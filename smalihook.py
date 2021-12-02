@@ -234,12 +234,14 @@ def inject_code_to_method_section(method_section):
     # return method_section  
   
   
-def inject_log_code(content):  
+def inject_log_code(content, method_i):  
     new_content = []  
     method_section = []  
     is_method_begin = False  
+    #找到对应的函数
     for line in content:  
-        if line[:7] == ".method":  
+        #找到对应的函数了
+        if line[:7] == ".method" and method_i in line:  
             is_method_begin = True
             method_section.append(line)  
             continue  
@@ -248,13 +250,11 @@ def inject_log_code(content):
         else:  
             new_content.append(line)  
         if line[:11] == ".end method" and is_method_begin:  
-            if not is_method_begin:  
-                raise ParserError(".method error")  
+            method_section.append(line) 
             is_method_begin = False  
+            #对这个函数插桩代码
             new_method_section = inject_code_to_method_section(method_section)  
-            new_content.extend(method_section)  
-            #print(method_section)
-            #print(method_section)
+            new_content.extend(new_method_section)  
             method_section.clear()
             
     return new_content  
@@ -316,6 +316,11 @@ def main():
                 
                 #这里找到了class和method所在的文件,可以进行接下来的读操作
                 print(class_smali_path)
+                file = open(class_smali_path,'r',encoding='UTF-8')  
+                lines = file.readlines()  
+                file.close()
+                new_code = inject_log_code(lines, target_method[i])
+                
                 
                 #跳出循环
                 break
@@ -324,10 +329,7 @@ def main():
     #     for file_name in files:  
     #         file_path = os.path.join(root, file_name)
     #         print(file_path)  
-    #         file = open(file_path,'r',encoding='UTF-8')  
-    #         lines = file.readlines()  
-    #         file.close()
-    #         new_code = inject_log_code(lines)  
+              
             # file = open(file_path, "w")  
             # file.writelines(new_code)  
             # file.close()  
