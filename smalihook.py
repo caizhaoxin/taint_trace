@@ -5,6 +5,10 @@ import os
 register_list = []
 register_index = -1
 
+#存储火焰图的类和方法
+target_class = []
+target_method = []
+
 class ParserError(Exception):  
     pass  
 
@@ -255,15 +259,49 @@ def inject_log_code(content):
             
     return new_content  
   
-  
+
+
+
+#读取火焰图并生成对应的类
+def read_flame_function_list():
+    r = open('./res.txt', 'r')
+    function_list = r.readlines()
+    r.close()
+    
+    for function in function_list:
+        class_method = function.split(" ")[0]
+        index = class_method.rfind('.')
+        if index != -1:
+            class_name = class_method[:index]
+            method_name = class_method[index + 1:]
+            
+            package_list = class_name.split('.')
+            
+            
+            #变成文件夹的格式
+            class_package_name = ''
+            for i in range(0, len(package_list)):
+                #print(package_list[i])
+                class_package_name = os.path.join(class_package_name, package_list[i])
+            
+            global target_class
+            global target_method
+            target_class.append(class_package_name)
+            target_method.append(method_name)
+        
+    
+
 def main():  
     i = 0
+    
+    read_flame_function_list()
+    global target_class
+    global target_method
+    
     walker = os.walk("./")  
     for root, directory, files in walker:  
         for file_name in files:  
-            if file_name != "Util.smali" or file_name[:5] == "Cocos":  
-                continue  
-            file_path = root + "/" + file_name  
+            file_path = os.path.join(root, file_name)
             print(file_path)  
             file = open(file_path,'r',encoding='UTF-8')  
             lines = file.readlines()  
@@ -278,5 +316,5 @@ def main():
   
   
 if __name__ == '__main__':  
-    main()
+    read_flame_function_list()
     #insert_mylog("demo")  
