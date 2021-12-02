@@ -15,6 +15,7 @@ def get_register():
     register_index %= len(register_list)
     return register_list[register_index]
 
+
 #把自己定义好的Log类插入到App中
 def insert_mylog(package_name):
     root_path = os.path.join(package_name, 'smali')
@@ -77,25 +78,50 @@ def count_arguments(arguments):
     return argumen_count
 
 
-#生成输出的代码
-def generate_log_parameters(argument_count):
-    inject_code = []
-    inject_code.append("\n")
-    for i in range(0, argument_count):
-        #获取一个寄存器
-        current_register = get_register()
-        #当前参数的符号是pi
-        current_parameter = "p" + str(i + 1)
-        
-        #生成log参数的代码...
+##生成log参数和stacktrace的smali代码
+def generate_log_parameters(arguments, argument_count, is_static):
     
+    #静态和非静态对应的其实参数符号不同
+    if is_static:
+        if argument_count > 1:
+            current_parameter = '{p0 .. p' + str(argument_count - 1) + '}'
+        elif argument_count == 1:
+            current_parameter = '{p0}'
+    else:
+        if argument_count > 1:
+            current_parameter = '{p1 .. p' + str(argument_count) + '}'
+        elif argument_count == 1:
+            current_parameter = '{p1}'
+    #插入log参数和调用栈的smali语句
     
-    inject_code.append("\n")
+    #如果没有参数的话就直接打印调用栈
+    if argument_count == 0:
+        inject_code = [
+            '\n',
+            '    invoke-static {}, Lcn/log/Log;->getStack()Ljava/lang/String;'
+            '\n'
+        ]
+    #如果有参数则log参数
+    elif argument_count > 0:
+        inject_code = [
+            '\n',
+            '    invoke-static {}, Lcn/log/Log;->getStack()Ljava/lang/String;'
+            '\n',
+            '\n',
+            '    invoke-static/range ' + current_parameter + ', Lcn/log/Log;->log' + arguments + 'Ljava/lang/String;',
+            '\n'
+        ]
+    #出错了,返回空列表
+    else:
+        inject_code = []
+    
     return inject_code
     
 
 #   
 def inject_code_to_method_section(method_section):  
+    
+    result_method = []
     #print(method_section)
     #   
     if method_section[0].find("static constructor") != -1:  
@@ -132,23 +158,25 @@ def inject_code_to_method_section(method_section):
     #获取参数的个数
     argument_count = count_arguments(arguments)
     
-    
+    #记录是否要开始插桩
+    start_inject = False
+    #记录是否插入了参数和调用栈
+    is_inject_para_stack = False
 
     # 这里是插桩的逻辑
     for i in range(0, len(method_section)):  
-        print(method_section[i])
-        #记录是否要开始插桩
-        start_inject = False
+        statement = method_section[i]
+        
         #找到配置寄存器的个数
-        if method_section[i].find(".locals") != -1:
+        if statement.find(".locals") != -1:
             #开始插桩
             start_inject = True
-            locals_line = method_section[i].split(" ")
+            locals_line = statement.split(" ")
             local_count = locals_line[len(locals_line) - 1]
             local_count = int(local_count)
             #改为14
             new_local_count = 14
-            method_section[i] = "    .locals " + str(new_local_count) + "\n"
+            statement = "    .locals " + str(new_local_count) + "\n"
             
             #生成可用的寄存器
             global register_list
@@ -159,7 +187,31 @@ def inject_code_to_method_section(method_section):
         
         if start_inject:
             #开始插桩...
-            return
+            #log参数和调用栈的代码插桩
+            if statement == '\n' and not is_inject_para_stack:
+                
+                #判断是否静态,对应的参数起始符号不一样
+                if 'static' in method_des:
+                    log_para_inject = generate_log_parameters(arguments, argument_count, True)
+                else:
+                    log_para_inject = generate_log_parameters(arguments, argument_count, False)
+                    
+                #插入代码
+                if len(log_para_inject) != 0:
+                    result_method.extend(log_para_inject)
+                    
+                is_inject_para_stack = True
+                continue
+            
+            
+        
+        
+        
+        result_method.append(statement)
+        
+        
+    for line in result_method:
+        print(line)
             
                 
             
@@ -226,5 +278,5 @@ def main():
   
   
 if __name__ == '__main__':  
-    #main()
-    insert_mylog("demo")  
+    main()
+    #insert_mylog("demo")  
