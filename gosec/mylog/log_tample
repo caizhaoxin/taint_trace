@@ -1,0 +1,33 @@
+
+// Writer方法修改，把packageName 和 fileName改了就好
+.field public static fileName:Ljava/lang/String; = "why!!!.txt"
+.field public static packageName:Ljava/lang/String; = "cn.log"
+
+
+
+// log smali代码模板
+// 打印调用栈
+invoke-static {}, Lgosec/mylog/Log;->getStack()V
+
+// 打印参数
+invoke-static/range {p0..p3}, Lgosec/mylog/Log;->logParameters([Ljava/lang/Object;)V
+
+// 打印中间某个寄存器的值
+invoke-static {v4}, Lgosec/mylog/Log;->logVariables([Ljava/lang/Object;)V
+
+// 打印结果的值
+invoke-static {v14}, Lgosec/mylog/Log;->logReturnVal(Ljava/lang/Object;)V
+
+// 调用返回类型为void 的 静态方法 打印赋值关系
+invoke-static {v4}, Lgosec/mylog/Log;->logStaticInvokeVoid([Ljava/lang/Object;)V
+
+// 调用返回类型为void 的 实例方法 打印赋值关系， 注意这里的c，也就是第二个参数是调用这个方法的实例！
+invoke-static {v4, v8}, Lgosec/mylog/Log;->logInvokeVoid(Ljava/lang/Object;[Ljava/lang/Object;)V
+
+// 调用返回类型 不是void 的 静态方法 打印赋值关系
+invoke-static {v3}, Lgosec/mylog/Log;->logStaticInvokeNotVoidBefore([Ljava/lang/Object;)V
+invoke-static {v5}, Lgosec/mylog/Log;->logStaticInvokeNotVoidAfter(Ljava/lang/Object;)V
+
+// 调用返回类型 不是void 的 实例方法 打印赋值关系 ， 同样！注意这里的c，也就是第三个参数是调用这个方法的实例！
+invoke-static {v0, v1}, Lgosec/mylog/Log;->logInvokeNotVoidBefore(Ljava/lang/Object;[Ljava/lang/Object;)V
+invoke-static {v14}, Lgosec/mylog/Log;->logInvokeNotVoidAfter(Ljava/lang/Object;)V

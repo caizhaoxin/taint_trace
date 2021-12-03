@@ -7,6 +7,11 @@
  */
 package gosec.mylog;
 
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
+
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,7 +26,8 @@ public class Log {
     private static final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");//设置日期格式
     private static final Set<String> primitiveTypeSet = new HashSet<>();
     private static final String line = "------------------------------------------------------------------------------";
-    private static ThreadLocal<Map<String, String>> threadLocalMethod = new ThreadLocal<>();
+    private static ThreadLocal<Long> threadLocalLong = new ThreadLocal<>();
+    private static ThreadLocal<Map<Long, String>> threadLocalMethod = new ThreadLocal<>();
 
     static {
         primitiveTypeSet.add("java.lang.Boolean");
@@ -105,58 +111,52 @@ public class Log {
     }
 
     /**
-     * @param packageName: app包名
-     * @param fileName:    log文件名
-     * @param objs:        参数
+     * @param objs: 参数
      * @author: caizhaoxin
      * @methodsName: logParameters
      * @description: 用于记录方法的所有参数，一般用在开头输出所有参数
      * @return:
      */
-    public static void logParameters(String packageName, String fileName, Object... objs) {
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static void logParameters(Object... objs) throws IOException {
         String res = "logParameters: \n" + head() + logData("para", objs);
-        Writer.write(packageName, fileName, res);
+        Writer.write(res);
     }
 
     /**
-     * @param packageName: app包名
-     * @param fileName:    log文件名
-     * @param objs:        参数
+     * @param objs: 参数
      * @author: caizhaoxin
      * @methodsName: logVariables
      * @description: 用于记录过程间参数，一般查看过程间哪个参数比较感兴趣
      * @return:
      */
-    public static void logVariables(String packageName, String fileName, Object... objs) {
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static void logVariables(Object... objs) throws IOException {
         String res = "logVariables: \n" + head() + logData("vari", objs);
-        Writer.write(packageName, fileName, res);
+        Writer.write(res);
     }
 
     /**
-     * @param packageName: app包名
-     * @param fileName:    log文件名
-     * @param obj:         参数
+     * @param obj: 返回参数
      * @author: caizhaoxin
      * @methodsName: logReturnVal
      * @description: 用于记录返回的结果
      * @return:
      */
-    public static void logReturnVal(String packageName, String fileName, Object obj) {
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static void logReturnVal(Object obj) throws IOException {
         String res = "logVariables: \n" + head() + logData("vari", obj);
-        Writer.write(packageName, fileName, res);
+        Writer.write(res);
     }
 
     /**
-     * @param packageName: app包名
-     * @param fileName:    log文件名
-     * @param packageName: app包名
-     * @param fileName:    log文件名
      * @author: caizhaoxin
      * @methodsName: getStack
      * @description: 打印调用栈
      * @return:
      */
-    public static void getStack(String packageName, String fileName) {
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static void getStack() throws IOException {
         StackTraceElement[] stackElements = new Throwable().getStackTrace();
         StringBuffer sb = new StringBuffer();
         // 获取头部信息
@@ -166,193 +166,166 @@ public class Log {
                 sb.append(indent(4) + stackElements[i].toString() + "\n");
             }
         }
-        Writer.write(packageName, fileName, "getStack: \n" + endLine(sb.toString()));
+        Writer.write("getStack: \n" + endLine(sb.toString()));
     }
 
     /**
-     * @param packageName: app包名
-     * @param fileName:    log文件名
-     * @param methodName:  方法名
-     * @param paras:       参数数组
+     * @param paras: 参数数组
      * @author: caizhaoxin
      * @methodsName: logStaticInvokeVoid
      * @description: 调用静态方法 且 方法的返回类型为void
      * @return: void
      */
-    public static void logStaticInvokeVoid(String packageName, String fileName, String methodName, Object... paras) {
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static void logStaticInvokeVoid(Object... paras) throws IOException {
         StringBuilder sb = new StringBuilder("staticInvokeVoid: \n");
         sb.append(head());
-        sb.append(String.format("invoke method: %s\n", methodName));
+//        sb.append(String.format("invoke method: %s\n",));
         sb.append("invoke parameters:\n" + handleParas("paras", paras));
-        Writer.write(packageName, fileName, endLine(sb.toString()));
+        Writer.write(endLine(sb.toString()));
     }
 
     /**
-     * @param packageName: app包名
-     * @param fileName:    log文件名
-     * @param methodName:  方法名
-     * @param source:      调用者实例
-     * @param paras:       参数数组
+     * @param source: 调用者实例
+     * @param paras:  参数数组
      * @author: caizhaoxin
      * @methodsName: logInvokeVoid
      * @description: 调用实例方法，且 方法的返回类型为void
      * @return: void
      */
-    public static void logInvokeVoid(String packageName, String fileName, String methodName, Object source, Object... paras) {
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static void logInvokeVoid(Object source, Object... paras) throws IOException {
         StringBuilder sb = new StringBuilder("invokeVoid: \n");
         sb.append(head());
-        sb.append(String.format("invoke method: %s\n", methodName));
         sb.append("invoke source: " + source.getClass().getName() + " -> " + handlePara(source) + "\n");
         sb.append("invoke parameters:\n" + handleParas("paras", paras));
-        Writer.write(packageName, fileName, endLine(sb.toString()));
+        Writer.write(endLine(sb.toString()));
     }
 
     /**
-     * @param methodName: 方法名
-     * @param signature:  唯一标识
-     * @param paras:      参数数组
      * @author: caizhaoxin
      * @methodsName: logStaticInvokeNotVoidBefore
      * @description: 调用静态方法 且 方法的返回值不为void
      * @return: void
      */
-    public static void logStaticInvokeNotVoidBefore(String methodName, String signature, Object... paras) {
+    public static void logStaticInvokeNotVoidBefore(Object... paras) throws IOException {
+        if (threadLocalLong.get() == null) threadLocalLong.set(new Long(Long.MIN_VALUE));
         if (threadLocalMethod.get() == null) threadLocalMethod.set(new HashMap<>());
-        Map<String, String> map = threadLocalMethod.get();
+        Long index = threadLocalLong.get();
+        Map<Long, String> mp = threadLocalMethod.get();
         StringBuilder sb = new StringBuilder("staticInvokeNotVoid: \n");
         sb.append(head());
-        sb.append(String.format("invoke method: %s\n", methodName));
         sb.append("invoke parameters:\n" + handleParas("paras", paras));
-        map.put(signature, sb.toString());
+        mp.put(index, sb.toString());
+        threadLocalLong.set(index + 1);
     }
 
     /**
-     * @param packageName: app包名
-     * @param fileName:    log文件名
-     * @param signature:   唯一标识
      * @param returnValue: 参数数组
      * @author: caizhaoxin
      * @methodsName: logStaticInvokeNotVoidAfter
      * @description: 用与staticInvokeNotVoidBefore之后调用，记录log
      * @return: void
      */
-    public static void logStaticInvokeNotVoidAfter(String packageName, String fileName, String signature, Object returnValue) {
-        if (threadLocalMethod.get() == null) {
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static void logStaticInvokeNotVoidAfter(Object returnValue) throws IOException {
+        if (threadLocalMethod.get() == null || threadLocalLong.get() == null) {
             StringBuilder sb = new StringBuilder("staticInvokeNotVoid: \n");
             sb.append(head());
             sb.append("pls invoke staticInvokeNotVoidBefore first!");
-            Writer.write(packageName, fileName, endLine(sb.toString()));
+            Writer.write(endLine(sb.toString()));
         }
-        Map<String, String> map = threadLocalMethod.get();
-        StringBuilder sb = new StringBuilder(map.get(signature));
-        sb.append("invoke result:\n" + handleParas("res", returnValue));
-        map.remove(signature);
-        Writer.write(packageName, fileName, endLine(sb.toString()));
+        Long index = threadLocalLong.get() - 1;
+        threadLocalLong.set(index);
+        Map<Long, String> mp = threadLocalMethod.get();
+        String str = mp.get(index);
+        str += ("invoke result:\n" + handleParas("res", returnValue));
+        Writer.write(endLine(str));
     }
 
     /**
-     * @param methodName: 方法名
-     * @param signature:  唯一标识
-     * @param paras:      参数数组
-     * @param source:     调用者实例
+     * @param source: 调用者实例
      * @author: caizhaoxin
      * @methodsName: logInvokeNotVoidBefore
      * @description: 调用实例方法，且 方法的返回类型不为void
      * @return: void
      */
-    public static void logInvokeNotVoidBefore(String methodName, String signature, Object source, Object... paras) {
+    public static void logInvokeNotVoidBefore(Object source, Object... paras) {
+        if (threadLocalLong.get() == null) threadLocalLong.set(new Long(Long.MIN_VALUE));
         if (threadLocalMethod.get() == null) threadLocalMethod.set(new HashMap<>());
-        Map<String, String> map = threadLocalMethod.get();
-        StringBuilder sb = new StringBuilder("invokeNotVoid: \n");
+        Long index = threadLocalLong.get();
+        Map<Long, String> mp = threadLocalMethod.get();
+        StringBuilder sb = new StringBuilder("logInvokeNotVoidBefore: \n");
         sb.append(head());
-        sb.append(String.format("invoke method: %s\n", methodName));
-        sb.append("invoke source: " + source.getClass().getName() + " -> " + handlePara(source) + "\n");
         sb.append("invoke parameters:\n" + handleParas("paras", paras));
-        map.put(signature, sb.toString());
+        mp.put(index, sb.toString());
+        threadLocalLong.set(index + 1);
     }
 
     /**
-     * @param packageName: app包名
-     * @param fileName:    log文件名
-     * @param signature:   唯一标识
-     * @param returnValue: 参数数组
+     * @param returnValue: 返回参数
      * @author: caizhaoxin
      * @methodsName: logInvokeNotVoidAfter
      * @description: 用与invokeNotVoidBefore之后调用，记录log
      * @return: void
      */
-    public static void logInvokeNotVoidAfter(String packageName, String fileName, String signature, Object returnValue) {
-        if (threadLocalMethod.get() == null) {
-            StringBuilder sb = new StringBuilder("invokeNotVoid: \n");
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static void logInvokeNotVoidAfter(Object returnValue) throws IOException {
+        if (threadLocalMethod.get() == null || threadLocalLong.get() == null) {
+            StringBuilder sb = new StringBuilder("logInvokeNotVoidAfter: \n");
             sb.append(head());
-            sb.append("pls invoke invokeNotVoidBefore first!");
-            Writer.write(packageName, fileName, endLine(sb.toString()));
+            sb.append("pls invoke logInvokeNotVoidAfter first!");
+            Writer.write(endLine(sb.toString()));
         }
-        Map<String, String> map = threadLocalMethod.get();
-        StringBuilder sb = new StringBuilder(map.get(signature));
-        sb.append("invoke result:\n" + handleParas("res", returnValue));
-        map.remove(signature);
-        Writer.write(packageName, fileName, endLine(sb.toString()));
+        Long index = threadLocalLong.get() - 1;
+        threadLocalLong.set(index);
+        Map<Long, String> mp = threadLocalMethod.get();
+        String str = mp.get(index);
+        str += ("invoke result:\n" + handleParas("res", returnValue));
+        Writer.write(endLine(str));
     }
 
-    private static void test1() {
-        int a = 123;
-        double b = 234.3;
-        char c = 'a';
-        Double d = new Double(123.2);
-        String signature = "12312312312312sd12s2s";
-        logInvokeNotVoidBefore("test2", signature, a, b, c, d);
-        test2();
-        logInvokeNotVoidAfter("cn.log", "data.txt", signature, a);
-    }
-
-    private static void test2() {
-        int[] arr1 = {123, 12, 312, 312, 3};
-        byte[] arr2 = "asdasdsa".getBytes();
-        String str = "sd";
-        Info[] infos = {new Info("123"), new Info("5555")};
-        String signature = "sdsdsdsdaxx";
-        logInvokeNotVoidBefore("test3", signature, arr1, arr2, str, infos);
-        logInvokeNotVoidAfter("cn.log", "data.txt", signature, infos);
-    }
-
-    public static void main(String[] args) throws Exception {
-        // 参数
-        int a = 123;
-        double b = 234.3;
-        char c = 'a';
-        Double d = new Double(123.2);
-        int[] arr1 = {123, 12, 312, 312, 3};
-        byte[] arr2 = "asdasdsa".getBytes();
-        String str = "sd";
-        Info[] infos = {new Info("123"), new Info("5555")};
-        String signature = "";
-        String packageName = "cn.log";
-        String fileName = "data.txt";
-        // 打印调用栈
-        getStack(packageName, fileName);
-        // 打印参数
-        logParameters(packageName, fileName, a, b, c, d, arr1, arr2, str, infos);
-        // 打印中间某个寄存器的值
-        logVariables(packageName, fileName, a, b, c);
-        // 打印结果的值
-        logReturnVal(packageName, fileName, infos);
-        // 调用返回类型为void 的 静态方法 打印赋值关系
-        logStaticInvokeVoid(packageName, fileName, "fun1", a, b, infos);
-        // 调用返回类型为void 的 实例方法 打印赋值关系， 注意这里的c，也就是第二个参数是调用这个方法的实例！
-        logInvokeVoid(packageName, fileName, "fun2", c, d, infos, arr1);
-        // 调用返回类型 不是void 的 静态方法 打印赋值关系
-        signature = "723qyc857on2q4ydxo78213y4";
-        logStaticInvokeNotVoidBefore("fun3", signature, a, b, infos);
-        // move-result-object ... 之类的结果复制字节码, 记得signature一定要对应！！！  signature你在python随机生成然后插入就好了
-        logStaticInvokeNotVoidAfter(packageName, fileName, signature, arr1);
-        // 调用返回类型 不是void 的 实例方法 打印赋值关系 ， 同样！注意这里的c，也就是第三个参数是调用这个方法的实例！
-        signature = "234123c4c43";
-        logInvokeNotVoidBefore("fun4", signature, c, arr2);
-        // move-result-object ...
-        logInvokeNotVoidAfter(packageName, fileName, signature, infos);
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static String demo() {
+        try {
+            // 参数
+            int a = 123;
+            double b = 234.3;
+            char c = 'a';
+            Double d = new Double(123.2);
+            int[] arr1 = {123, 12, 312, 312, 3};
+            byte[] arr2 = "asdasdsa".getBytes();
+            String str = "sd";
+            Info[] infos = {new Info("123"), new Info("5555")};
+            String signature = "";
+            String packageName = "cn.log";
+            String fileName = "data.txt";
+            // 打印调用栈
+            getStack();
+            // 打印参数
+            logParameters(a, b, c, d, arr1, arr2, str, infos);
+            // 打印中间某个寄存器的值
+            logVariables(a, b, c);
+            // 打印结果的值
+            logReturnVal(infos);
+            // 调用返回类型为void 的 静态方法 打印赋值关系
+            logStaticInvokeVoid(a, b, infos);
+            // 调用返回类型为void 的 实例方法 打印赋值关系， 注意这里的c，也就是第二个参数是调用这个方法的实例！
+            logInvokeVoid(c, d, infos, arr1);
+            // 调用返回类型 不是void 的 静态方法 打印赋值关系
+            logStaticInvokeNotVoidBefore(a, b, infos);
+            logStaticInvokeNotVoidAfter(arr1);
+            // 调用返回类型 不是void 的 实例方法 打印赋值关系 ， 同样！注意这里的c，也就是第三个参数是调用这个方法的实例！
+            logInvokeNotVoidBefore(c, arr2);
+            logInvokeNotVoidAfter(infos);
+        } catch (Exception e) {
+            return e.toString();
+        }
+        return "success";
     }
 }
+
+
 
 
 class Info {

@@ -1,5 +1,9 @@
 package gosec.mylog;
 
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
+
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousFileChannel;
@@ -13,10 +17,19 @@ import java.nio.file.StandardOpenOption;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Writer {
+    public static String packageName;
+    public static String fileName;
+
+    static {
+        packageName = "cn.log";
+        fileName = "why!!!.txt";
+    }
+
     public static ConcurrentHashMap<String, BufferedWriter> writerMap = new ConcurrentHashMap<>();
 
     // bufferWriter
-    public static void write(String packageName, String fileName, String content) {
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static void write(String content) throws IOException {
         Path path = Paths.get("/data/data/", packageName, fileName);
         File file = new File(path.toString());
         if (!file.getParentFile().exists()) {
@@ -26,16 +39,13 @@ public class Writer {
             }
         }
         BufferedWriter bufferedWriter = writerMap.getOrDefault(path.toString(), null);
-        try {
-            if (bufferedWriter == null) {
-                bufferedWriter = new BufferedWriter(new OutputStreamWriter(
-                        new FileOutputStream(file, true)), (int) Math.pow(1024, 2));
-                writerMap.put(path.toString(), bufferedWriter);
-            }
-            bufferedWriter.write(content);
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (bufferedWriter == null) {
+            bufferedWriter = new BufferedWriter(new OutputStreamWriter(
+                    new FileOutputStream(file, true)), (int) Math.pow(1024, 2));
+            writerMap.put(path.toString(), bufferedWriter);
         }
+        bufferedWriter.write(content);
+        bufferedWriter.flush();
     }
 }
 
