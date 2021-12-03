@@ -269,6 +269,10 @@ def read_flame_function_list():
     r.close()
     
     for function in function_list:
+        #不需要关注线程名字,这个会在Log类中处理
+        if function.startswith('-'):
+            continue
+
         class_method = function.split(" ")[0]
         index = class_method.rfind('.')
         if index != -1:

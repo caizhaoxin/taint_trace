@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class Log {
+
+    
     public static String test() {
         return "我有一只小培福，我从来也不骑";
     }
