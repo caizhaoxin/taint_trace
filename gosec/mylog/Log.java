@@ -1,18 +1,8 @@
-/**
- * projectName: caizhaoxin
- * fileName: Log.java
- * packageName: gosec.log
- * date: 2021-12-2
- * copyright(c) 2017-2020 xxx公司
- */
 package gosec.mylog;
 
-import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import android.os.Build;
 
+<<<<<<< HEAD
 public class Log {
 <<<<<<< HEAD
 
@@ -90,26 +80,15 @@ public class Log {
         }
         return sb.toString();
     }
+=======
+import androidx.annotation.RequiresApi;
+>>>>>>> b2063a7fdf45a703158e7ad7baf452a1941d130d
 
-    private static String handlePara(Object obj) {
-        String objType = obj.getClass().getName();
-        if (objType.equals("[B"))
-            return new String((byte[]) obj);
-        // 检测是否为以为数组 目前只考虑一维数组 并且基础类型地不考虑 byte[] 除外
-        int l = 0;
-        while (l < objType.length() && objType.charAt(l) == '[') l++;
-        objType = objType.substring(l);
-        if (l > 0 && !primitiveTypeSet.contains(objType)) {
-            Object[] objs = (Object[]) obj;
-            StringBuilder sb = new StringBuilder("\n");
-            for (int i = 0; i < objs.length; i++)
-                sb.append(indent(8) + String.format("[%d] -> ", i) + objs[i].toString() + (i == objs.length - 1 ? "" : "\n"));
-            return sb.toString();
-        }
-        return obj.toString();
-    }
+import java.util.Stack;
 
+public class Log {
     /**
+<<<<<<< HEAD
 <<<<<<< HEAD
      * @param objs: 参数
 =======
@@ -117,11 +96,15 @@ public class Log {
      * @param fileName:    log文件名
      * @param objs:        参数
 >>>>>>> 76aee522471377b790a59bef54438e2d8fa2a8a1
+=======
+     * @param objs: 参数
+>>>>>>> b2063a7fdf45a703158e7ad7baf452a1941d130d
      * @author: caizhaoxin
-     * @methodsName: logParameters
+     * @methodsName: LogNonStatic
      * @description: 用于记录方法的所有参数，一般用在开头输出所有参数
      * @return:
      */
+<<<<<<< HEAD
 <<<<<<< HEAD
     public static void logParameters(Object... objs) {
         String res = "logParameters: \n" + head() + logData("para", objs);
@@ -199,15 +182,34 @@ public class Log {
 =======
     public static void getStack(String packageName, String fileName) {
 >>>>>>> 76aee522471377b790a59bef54438e2d8fa2a8a1
+=======
+    static ThreadLocal<DataStack> threadLocal = new ThreadLocal<>();
+
+    public static void add(Object obj) {
+        if (threadLocal.get() == null) threadLocal.set(new DataStack());
+        DataStack dataStack = threadLocal.get();
+        dataStack.addData(obj);
+    }
+
+    public static void stopAdding() {
+        if (threadLocal.get() == null) threadLocal.set(new DataStack());
+        DataStack dataStack = threadLocal.get();
+        dataStack.stopAdding();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static void logInvokeStack() {
+>>>>>>> b2063a7fdf45a703158e7ad7baf452a1941d130d
         StackTraceElement[] stackElements = new Throwable().getStackTrace();
         StringBuffer sb = new StringBuffer();
         // 获取头部信息
-        sb.append(head());
+        sb.append(Utils.head());
         if (stackElements != null) {
             for (int i = 1; i < stackElements.length; i++) {
-                sb.append(indent(4) + stackElements[i].toString() + "\n");
+                sb.append(Utils.indent(4) + stackElements[i].toString() + "\n");
             }
         }
+<<<<<<< HEAD
 <<<<<<< HEAD
         Writer.write("getStack: \n" + endLine(sb.toString()));
     }
@@ -509,11 +511,102 @@ class Info {
         return "Info{" +
                 "password='" + password + '\'' +
                 '}';
+=======
+        Writer.write("getStack: \n" + Utils.endLine(sb.toString()));
     }
 
+    public static void logParameters() {
+        if (threadLocal.get() == null) threadLocal.set(new DataStack());
+        DataStack dataStack = threadLocal.get();
+        Stack<Object> stack = dataStack.getData();
+        Object[] objs = new Object[stack.size()];
+        for (int i = 0; i < objs.length; i++) objs[i] = stack.pop();
+        String res = "logParameters: \n" + Utils.head() + Utils.logData("parameter", objs);
+        Writer.write(Utils.endLine(res));
+    }
+
+    public static void logReturnVal() {
+        if (threadLocal.get() == null) threadLocal.set(new DataStack());
+        DataStack dataStack = threadLocal.get();
+        Stack<Object> stack = dataStack.getData();
+        Object[] objs = new Object[stack.size()];
+        for (int i = 0; i < objs.length; i++) objs[i] = stack.pop();
+        String res = "logReturnVal: \n" + Utils.head() + Utils.logData("retVal", objs);
+        Writer.write(Utils.endLine(res));
+    }
+
+    public static void logVariables() {
+        if (threadLocal.get() == null) threadLocal.set(new DataStack());
+        DataStack dataStack = threadLocal.get();
+        Stack<Object> stack = dataStack.getData();
+        Object[] objs = new Object[stack.size()];
+        for (int i = 0; i < objs.length; i++) objs[i] = stack.pop();
+        String res = "logVariables: \n" + Utils.head() + Utils.logData("vari", objs);
+        Writer.write(Utils.endLine(res));
+    }
+
+    public static void logNonStaticVoid() {
+        if (threadLocal.get() == null) threadLocal.set(new DataStack());
+        DataStack dataStack = threadLocal.get();
+        Stack<Object> stack = dataStack.getData();
+        Object[] objs = new Object[stack.size()-1];
+        for (int i = 0; i < objs.length; i++) objs[i] = stack.pop();
+        Object source = stack.pop();
+        StringBuilder sb = new StringBuilder();
+        sb.append("logNonStaticVoid: \n");
+        sb.append(Utils.head());
+        sb.append("invoke source: " + source.getClass().getName() + " -> " + Utils.handlePara(source) + "\n");
+        sb.append("invoke parameters: \n");
+        sb.append(Utils.logData("para", objs));
+        sb.append("return type is void\n");
+        Writer.write(Utils.endLine(sb.toString()));
+    }
+
+    public static void logNonStaticNonVoid(Object result) {
+        if (threadLocal.get() == null) threadLocal.set(new DataStack());
+        DataStack dataStack = threadLocal.get();
+        Stack<Object> stack = dataStack.getData();
+        Object[] objs = new Object[stack.size()-1];
+        for (int i = 0; i < objs.length; i++) objs[i] = stack.pop();
+        Object source = stack.pop();
+        StringBuilder sb = new StringBuilder();
+        sb.append("logNonStaticNonVoid: \n");
+        sb.append(Utils.head());
+        sb.append("invoke source: " + source.getClass().getName() + " -> " + Utils.handlePara(source) + "\n");
+        sb.append("invoke parameters: \n");
+        sb.append(Utils.logData("para", objs));
+        sb.append("invoke result:\n" + Utils.handleParas("res", result));
+        Writer.write(Utils.endLine(sb.toString()));
+    }
+
+    public static void logStaticVoid() {
+        if (threadLocal.get() == null) threadLocal.set(new DataStack());
+        DataStack dataStack = threadLocal.get();
+        Stack<Object> stack = dataStack.getData();
+        Object[] objs = new Object[stack.size()];
+        for (int i = 0; i < objs.length; i++) objs[i] = stack.pop();
+        StringBuilder sb = new StringBuilder();
+        sb.append("logStaticVoid: \n");
+        sb.append(Utils.head());
+        sb.append("invoke parameters: \n");
+        sb.append(Utils.logData("para", objs));
+        sb.append("return type is void\n");
+        Writer.write(Utils.endLine(sb.toString()));
+    }
+
+    public static void logStaticNonVoid(Object obj) {
+        if (threadLocal.get() == null) threadLocal.set(new DataStack());
+        DataStack dataStack = threadLocal.get();
+        Stack<Object> stack = dataStack.getData();
+        Object[] objs = new Object[stack.size()];
+        for (int i = 0; i < objs.length; i++) objs[i] = stack.pop();
+        StringBuilder sb = new StringBuilder();
+        sb.append("logStaticNonVoid: \n");
+        sb.append(Utils.head());
+        sb.append("invoke parameters: \n");
+        sb.append(Utils.logData("para", objs));
+        sb.append("invoke result:\n" + Utils.handleParas("res", obj));
+        Writer.write(Utils.endLine(sb.toString()));
+>>>>>>> b2063a7fdf45a703158e7ad7baf452a1941d130d
+    }
 }
-
-
-
-
-
