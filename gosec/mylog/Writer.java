@@ -22,15 +22,17 @@ public class Writer {
 
     static {
         packageName = "cn.log";
-        fileName = "why!!!.txt";
+        fileName = "data.txt";
     }
 
     public static ConcurrentHashMap<String, BufferedWriter> writerMap = new ConcurrentHashMap<>();
 
     // bufferWriter
     @RequiresApi(api = Build.VERSION_CODES.O)
-    public static void write(String content) throws IOException {
-        Path path = Paths.get("/data/data/", packageName, fileName);
+    public static void write(String content) {
+//        System.out.println(content);
+//        Path path = Paths.get("/data/data/", packageName, fileName);
+        String path = String.format("/data/data/%s/%s", packageName, fileName);
         File file = new File(path.toString());
         if (!file.getParentFile().exists()) {
             boolean result = file.getParentFile().mkdirs();
@@ -38,14 +40,17 @@ public class Writer {
                 System.out.println("创建失败");
             }
         }
-        BufferedWriter bufferedWriter = writerMap.getOrDefault(path.toString(), null);
-        if (bufferedWriter == null) {
-            bufferedWriter = new BufferedWriter(new OutputStreamWriter(
-                    new FileOutputStream(file, true)), (int) Math.pow(1024, 2));
-            writerMap.put(path.toString(), bufferedWriter);
+        BufferedWriter bufferedWriter = writerMap.getOrDefault(path, null);
+        try {
+            if (bufferedWriter == null) {
+                bufferedWriter = new BufferedWriter(new OutputStreamWriter(
+                        new FileOutputStream(file, true)), (int) Math.pow(1024, 2));
+                writerMap.put(path, bufferedWriter);
+            }
+            bufferedWriter.write(content);
+            bufferedWriter.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        bufferedWriter.write(content);
-        bufferedWriter.flush();
     }
 }
-

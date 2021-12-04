@@ -4,7 +4,7 @@
 
 
 # static fields
-.field public static fileName:Ljava/lang/String; = "why!!!.txt"
+.field public static fileName:Ljava/lang/String; = "data.txt"
 
 .field public static packageName:Ljava/lang/String; = "cn.log"
 
@@ -45,17 +45,12 @@
 
 .method public static write(Ljava/lang/String;)V
     .locals 7
-    .annotation system Ldalvik/annotation/Throws;
-        value = {
-            Ljava/io/IOException;
-        }
-    .end annotation
 
     const/4 v0, 0x2
 
-    new-array v0, v0, [Ljava/lang/String;
+    new-array v0, v0, [Ljava/lang/Object;
 
-    .line 33
+    .line 35
     sget-object v1, Lgosec/mylog/Writer;->packageName:Ljava/lang/String;
 
     const/4 v2, 0x0
@@ -68,22 +63,22 @@
 
     aput-object v1, v0, v2
 
-    const-string v1, "/data/data/"
+    const-string v1, "/data/data/%s/%s"
 
-    invoke-static {v1, v0}, Ljava/nio/file/Paths;->get(Ljava/lang/String;[Ljava/lang/String;)Ljava/nio/file/Path;
+    invoke-static {v1, v0}, Ljava/lang/String;->format(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
 
     move-result-object v0
 
-    .line 34
+    .line 36
     new-instance v1, Ljava/io/File;
 
-    invoke-interface {v0}, Ljava/nio/file/Path;->toString()Ljava/lang/String;
+    invoke-virtual {v0}, Ljava/lang/String;->toString()Ljava/lang/String;
 
     move-result-object v3
 
     invoke-direct {v1, v3}, Ljava/io/File;-><init>(Ljava/lang/String;)V
 
-    .line 35
+    .line 37
     invoke-virtual {v1}, Ljava/io/File;->getParentFile()Ljava/io/File;
 
     move-result-object v3
@@ -94,7 +89,7 @@
 
     if-nez v3, :cond_0
 
-    .line 36
+    .line 38
     invoke-virtual {v1}, Ljava/io/File;->getParentFile()Ljava/io/File;
 
     move-result-object v3
@@ -105,24 +100,20 @@
 
     if-nez v3, :cond_0
 
-    .line 38
+    .line 40
     sget-object v3, Ljava/lang/System;->out:Ljava/io/PrintStream;
 
     const-string v4, "\u521b\u5efa\u5931\u8d25"
 
     invoke-virtual {v3, v4}, Ljava/io/PrintStream;->println(Ljava/lang/String;)V
 
-    .line 41
+    .line 43
     :cond_0
     sget-object v3, Lgosec/mylog/Writer;->writerMap:Ljava/util/concurrent/ConcurrentHashMap;
 
-    invoke-interface {v0}, Ljava/nio/file/Path;->toString()Ljava/lang/String;
+    const/4 v4, 0x0
 
-    move-result-object v4
-
-    const/4 v5, 0x0
-
-    invoke-virtual {v3, v4, v5}, Ljava/util/concurrent/ConcurrentHashMap;->getOrDefault(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+    invoke-virtual {v3, v0, v4}, Ljava/util/concurrent/ConcurrentHashMap;->getOrDefault(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
 
     move-result-object v3
 
@@ -130,7 +121,8 @@
 
     if-nez v3, :cond_1
 
-    .line 43
+    .line 46
+    :try_start_0
     new-instance v3, Ljava/io/BufferedWriter;
 
     new-instance v4, Ljava/io/OutputStreamWriter;
@@ -145,7 +137,7 @@
 
     const-wide/high16 v5, 0x4000000000000000L    # 2.0
 
-    .line 44
+    .line 47
     invoke-static {v1, v2, v5, v6}, Ljava/lang/Math;->pow(DD)D
 
     move-result-wide v1
@@ -154,21 +146,28 @@
 
     invoke-direct {v3, v4, v1}, Ljava/io/BufferedWriter;-><init>(Ljava/io/Writer;I)V
 
-    .line 45
+    .line 48
     sget-object v1, Lgosec/mylog/Writer;->writerMap:Ljava/util/concurrent/ConcurrentHashMap;
-
-    invoke-interface {v0}, Ljava/nio/file/Path;->toString()Ljava/lang/String;
-
-    move-result-object v0
 
     invoke-virtual {v1, v0, v3}, Ljava/util/concurrent/ConcurrentHashMap;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
 
-    .line 47
+    .line 50
     :cond_1
     invoke-virtual {v3, p0}, Ljava/io/BufferedWriter;->write(Ljava/lang/String;)V
 
-    .line 48
+    .line 51
     invoke-virtual {v3}, Ljava/io/BufferedWriter;->flush()V
+    :try_end_0
+    .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_0} :catch_0
 
+    goto :goto_0
+
+    :catch_0
+    move-exception p0
+
+    .line 53
+    invoke-virtual {p0}, Ljava/lang/Exception;->printStackTrace()V
+
+    :goto_0
     return-void
 .end method

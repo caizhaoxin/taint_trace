@@ -1,0 +1,56 @@
+
+
+// 打印调用栈
+invoke-static {}, Lgosec/mylog/LogInvokeStack;->log()V
+
+// 注意：add完后必须要stop，然后log才有效！
+// 打印参数 有多少参数，就放几个v进去！
+invoke-static/range {v5 .. v5}, Lgosec/mylog/Log;->add(Ljava/lang/Object;)V
+invoke-static/range {v6 .. v6}, Lgosec/mylog/Log;->add(Ljava/lang/Object;)V
+invoke-static/range {v12 .. v12}, Lgosec/mylog/Log;->add(Ljava/lang/Object;)V
+invoke-static {}, Lgosec/mylog/Log;->stopAdding()V
+invoke-static {}, Lgosec/mylog/Log;->logParameters()V
+
+// 打印中间某个寄存器的值
+invoke-static/range {v5 .. v5}, Lgosec/mylog/Log;->add(Ljava/lang/Object;)V
+invoke-static/range {v6 .. v6}, Lgosec/mylog/Log;->add(Ljava/lang/Object;)V
+invoke-static/range {v12 .. v12}, Lgosec/mylog/Log;->add(Ljava/lang/Object;)V
+invoke-static {}, Lgosec/mylog/Log;->stopAdding()V
+invoke-static {}, Lgosec/mylog/Log;->logVariables()V
+
+// 打印结果的值
+invoke-static/range {v5 .. v5}, Lgosec/mylog/Log;->add(Ljava/lang/Object;)V
+invoke-static/range {v6 .. v6}, Lgosec/mylog/Log;->add(Ljava/lang/Object;)V
+invoke-static/range {v12 .. v12}, Lgosec/mylog/Log;->add(Ljava/lang/Object;)V
+invoke-static {}, Lgosec/mylog/Log;->stopAdding()V
+invoke-static {}, Lgosec/mylog/Log;->logReturnVal()V
+
+// 调用返回类型为 void 的 静态方法 打印赋值关系
+invoke-static/range {v5 .. v5}, Lgosec/mylog/Log;->add(Ljava/lang/Object;)V
+invoke-static/range {v6 .. v6}, Lgosec/mylog/Log;->add(Ljava/lang/Object;)V
+invoke-static/range {v12 .. v12}, Lgosec/mylog/Log;->add(Ljava/lang/Object;)V
+invoke-static {}, Lgosec/mylog/Log;->stopAdding()V
+invoke-static {}, Lgosec/mylog/Log;->logStaticVoid()V
+
+// 调用返回类型为 void 的 实例方法 打印赋值关系， 注意第一次调用add，传的应该是实例对象
+invoke-static/range {p1 .. p1}, Lgosec/mylog/Log;->add(Ljava/lang/Object;)V
+invoke-static/range {v5 .. v5}, Lgosec/mylog/Log;->add(Ljava/lang/Object;)V
+invoke-static/range {v6 .. v6}, Lgosec/mylog/Log;->add(Ljava/lang/Object;)V
+invoke-static/range {v12 .. v12}, Lgosec/mylog/Log;->add(Ljava/lang/Object;)V
+invoke-static {}, Lgosec/mylog/Log;->stopAdding()V
+invoke-static {}, Lgosec/mylog/Log;->logNonStaticVoid()V
+
+// 调用返回类型 不是void 的 静态方法 打印赋值关系
+invoke-static/range {v5 .. v5}, Lgosec/mylog/Log;->add(Ljava/lang/Object;)V
+invoke-static/range {v6 .. v6}, Lgosec/mylog/Log;->add(Ljava/lang/Object;)V
+invoke-static/range {v12 .. v12}, Lgosec/mylog/Log;->add(Ljava/lang/Object;)V
+invoke-static {}, Lgosec/mylog/Log;->stopAdding()V
+invoke-static {}, Lgosec/mylog/Log;->logStaticNonVoid()V
+
+// 调用返回类型 不是void 的 实例方法 打印赋值关系 ，注意第一次调用add，传的应该是实例对象
+invoke-static/range {v13 .. v13}, Lgosec/mylog/Log;->add(Ljava/lang/Object;)V
+invoke-static/range {v5 .. v5}, Lgosec/mylog/Log;->add(Ljava/lang/Object;)V
+invoke-static/range {v6 .. v6}, Lgosec/mylog/Log;->add(Ljava/lang/Object;)V
+invoke-static/range {v12 .. v12}, Lgosec/mylog/Log;->add(Ljava/lang/Object;)V
+invoke-static {}, Lgosec/mylog/Log;->stopAdding()V
+invoke-static/range {v7 .. v7}, Lgosec/mylog/Log;->logNonStaticNonVoid(Ljava/lang/Object;)V

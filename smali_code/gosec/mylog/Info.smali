@@ -1,6 +1,6 @@
 .class Lgosec/mylog/Info;
 .super Ljava/lang/Object;
-.source "Log.java"
+.source "Demo.java"
 
 
 # instance fields
@@ -11,10 +11,10 @@
 .method public constructor <init>(Ljava/lang/String;)V
     .locals 0
 
-    .line 359
+    .line 48
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 
-    .line 360
+    .line 49
     iput-object p1, p0, Lgosec/mylog/Info;->password:Ljava/lang/String;
 
     return-void
@@ -25,7 +25,7 @@
 .method public toString()Ljava/lang/String;
     .locals 2
 
-    .line 365
+    .line 54
     new-instance v0, Ljava/lang/StringBuilder;
 
     invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
