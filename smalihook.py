@@ -12,11 +12,15 @@ class ParserError(Exception):
 
 #log的时候添加的所要log的值,插入参数的模版
 def add_parameters(parameter_list):
+<<<<<<< HEAD
     #print(parameter_list)
+=======
+>>>>>>> 895e6693d16628de4e01c6d45dfc7c49155376c5
     
     add_parameters_inject_code = ['\n']
     
     for each_para in parameter_list:
+<<<<<<< HEAD
         if each_para != '':
             #print(each_para)
             add_para = '    invoke-static/range {'+ each_para +' .. ' + each_para + '}, Lgosec/mylog/Log;->add(Ljava/lang/Object;)V\n'
@@ -24,6 +28,13 @@ def add_parameters(parameter_list):
             add_parameters_inject_code.append('\n')
     
     add_parameters_inject_code.append('    invoke-static {}, Lgosec/mylog/Log;->stopAdding()V\n')
+=======
+        add_para = '    invoke-static/range {'+ each_para +' .. ' + each_para + '}, Lgosec/mylog/Log;->add(Ljava/lang/Object;)V'
+        add_parameters_inject_code.append(add_para)
+        add_parameters_inject_code.append('\n')
+    
+    add_parameters_inject_code.append('    invoke-static {}, Lgosec/mylog/Log;->stopAdding()V')
+>>>>>>> 895e6693d16628de4e01c6d45dfc7c49155376c5
     add_parameters_inject_code.append('\n')
     
     return add_parameters_inject_code
@@ -31,7 +42,11 @@ def add_parameters(parameter_list):
 def add_stack_log():
     return [
         '\n',
+<<<<<<< HEAD
         '    invoke-static {}, Lgosec/mylog/LogInvokeStack;->log()V\n',
+=======
+        '    invoke-static {}, Lgosec/mylog/LogInvokeStack;->log()V',
+>>>>>>> 895e6693d16628de4e01c6d45dfc7c49155376c5
         '\n'
     ]
     
@@ -126,9 +141,12 @@ def count_arguments(arguments):
 
 ##生成log参数和stacktrace的smali代码
 def generate_log_parameters(argument_count, is_static):
+<<<<<<< HEAD
     if argument_count == 0:
         return []
     
+=======
+>>>>>>> 895e6693d16628de4e01c6d45dfc7c49155376c5
     inject_code = []
     paras_list = []
     #静态和非静态对应的其实参数符号不同
@@ -145,7 +163,11 @@ def generate_log_parameters(argument_count, is_static):
     inject_code.extend(add_code)
     
     inject_code.extend([
+<<<<<<< HEAD
         '    invoke-static {}, Lgosec/mylog/Log;->logParameters()V\n',
+=======
+        '    invoke-static {}, Lgosec/mylog/Log;->logParameters()V',
+>>>>>>> 895e6693d16628de4e01c6d45dfc7c49155376c5
         '\n'
     ])
     
@@ -202,13 +224,17 @@ def inject_code_to_method_section(method_section):
 
     # 这里是插桩的逻辑
     for i in range(0, len(method_section)):  
+<<<<<<< HEAD
         raw_statement = method_section[i]
+=======
+>>>>>>> 895e6693d16628de4e01c6d45dfc7c49155376c5
         statement = method_section[i].strip()
         
         #找到配置寄存器的个数
         if statement.find(".locals") != -1:
             #开始插桩
             start_inject = True
+<<<<<<< HEAD
             result_method.extend([
                 raw_statement,
                 '\n'
@@ -216,6 +242,8 @@ def inject_code_to_method_section(method_section):
             
             #打印调用栈
             result_method.extend(add_stack_log())
+=======
+>>>>>>> 895e6693d16628de4e01c6d45dfc7c49155376c5
                 
             #判断是否静态,对应的参数起始符号不一样
             if 'static' in method_des:
@@ -234,6 +262,7 @@ def inject_code_to_method_section(method_section):
             #log参数和调用栈的代码插桩
             # if statement == '\n' and not is_inject_para_stack:
                 
+<<<<<<< HEAD
             #     #打印调用栈
             #     result_method.extend(add_stack_log())
                 
@@ -242,15 +271,31 @@ def inject_code_to_method_section(method_section):
             #         log_para_inject = generate_log_parameters(argument_count, True)
             #     else:
             #         log_para_inject = generate_log_parameters(argument_count, False)
+=======
+                #打印调用栈
+                result_method.extend(add_stack_log())
+                
+                #判断是否静态,对应的参数起始符号不一样
+                if 'static' in method_des:
+                    log_para_inject = generate_log_parameters(argument_count, True)
+                else:
+                    log_para_inject = generate_log_parameters(argument_count, False)
+>>>>>>> 895e6693d16628de4e01c6d45dfc7c49155376c5
                     
             #     #插入代码
             #     if len(log_para_inject) != 0:
             #         result_method.extend(log_para_inject)
                 
                     
+<<<<<<< HEAD
             #     is_inject_para_stack = True
             #     #跳过接下来的操作
             #     continue
+=======
+                is_inject_para_stack = True
+                #跳过接下来的操作
+                continue
+>>>>>>> 895e6693d16628de4e01c6d45dfc7c49155376c5
             
             #找到调用函数的地方了
             if statement.startswith('move-result-object'):
@@ -264,6 +309,7 @@ def inject_code_to_method_section(method_section):
                 return_smali = invoke_return_smali[2].strip()
                 
                 #操作字符串
+<<<<<<< HEAD
                 start = invoke_smali.find('{')
                 end = invoke_smali.find('}')
                 
@@ -278,6 +324,19 @@ def inject_code_to_method_section(method_section):
                 #类似于[v0, v1]
                 invoke_paras = invoke_paras_raw.split(', ')
                 #print('last_invoke_paras = ' + str(invoke_paras))
+=======
+                invoke_info = invoke_smali.split(' ')
+                return_info = return_smali.split(' ')
+                
+                #类似于{v0, v1},
+                invoke_paras_raw = invoke_info[1]
+                #类似于v0
+                return_para = return_info[1]
+                
+                invoke_paras = invoke_paras_raw[1: len(invoke_paras_raw) - 2]
+                #类似于[v0, v1]
+                invoke_paras = invoke_paras.split(', ')
+>>>>>>> 895e6693d16628de4e01c6d45dfc7c49155376c5
                 
                 #插入add参数的log方法
                 log_paras = add_parameters(invoke_paras)
@@ -285,6 +344,7 @@ def inject_code_to_method_section(method_section):
                 log_paras.append('\n')
                 
                 #插入log函数调用返回值的操作
+<<<<<<< HEAD
                 if invoke_smali.startswith('invoke'):
                     if invoke_smali.startswith('invoke-static'):
                         #静态调用
@@ -302,12 +362,34 @@ def inject_code_to_method_section(method_section):
                     #因为读到这一行move-result-object的时候result_method已经读取了之前的两行invoke操作了,所以要先把它去除掉,在插桩上我们的代码
                     del result_method[-2:]
                     result_method.extend(log_paras)
+=======
+                if invoke_info[0] == 'invoke-static':
+                    #静态调用
+                    log_paras.extend([
+                        '    invoke-static/range {' + return_para + ' .. ' + return_para + '}, Lgosec/mylog/Log;->logStaticNonVoid(Ljava/lang/Object;)V',
+                        '\n'
+                    ])
+                elif invoke_info[0] == 'invoke-virtual':
+                    #非静态调用
+                    log_paras.extend([
+                        '    invoke-static/range {' + return_para + ' .. ' + return_para + '}, Lgosec/mylog/Log;->logNonStaticNonVoid(Ljava/lang/Object;)V',
+                        '\n'
+                    ])
+                
+                #因为读到这一行move-result-object的时候result_method已经读取了之前的两行invoke操作了,所以要先把它去除掉,在插桩上我们的代码
+                del result_method[-2:]
+                result_method.extend(log_paras)
+>>>>>>> 895e6693d16628de4e01c6d45dfc7c49155376c5
                 
                 #跳过接下来的操作
                 continue
             
             #碰到当前函数的返回值了
+<<<<<<< HEAD
             if statement.startswith('return-object') and not is_return:
+=======
+            if statement.startswith('return-object'):
+>>>>>>> 895e6693d16628de4e01c6d45dfc7c49155376c5
                 return_def = statement.split(' ')
                 return_register = return_def[1]
                 
@@ -315,6 +397,7 @@ def inject_code_to_method_section(method_section):
                 #在return之前插入
                 result_method.extend(inject_return_log)
                 result_method.extend([
+<<<<<<< HEAD
                     '    invoke-static {}, Lgosec/mylog/Log;->logReturnVal()V\n',
                     '\n'
                 ])
@@ -333,6 +416,18 @@ def inject_code_to_method_section(method_section):
     return result_method
         
         
+=======
+                    '    invoke-static {}, Lgosec/mylog/Log;->logReturnVal()V',
+                    '\n'
+                ])
+        
+        
+        
+        result_method.append(statement)
+    return result_method
+        
+        
+>>>>>>> 895e6693d16628de4e01c6d45dfc7c49155376c5
   
   
 def inject_log_code(content, method_i):  
@@ -436,7 +531,16 @@ def main(package_name):
                 smali_file = open(class_smali_path,'r',encoding='UTF-8')  
                 lines = smali_file.readlines()  
                 smali_file.close()
+<<<<<<< HEAD
+=======
                 
+>>>>>>> 895e6693d16628de4e01c6d45dfc7c49155376c5
+                
+                #修改smali文件,返回一个新的smali文件
+                new_code = inject_log_code(lines, target_method[i])
+                smali_file = open(class_smali_path, 'w')
+                smali_file.write(new_code)
+                smali_file.close()
                 
                 #修改smali文件,返回一个新的smali文件
                 new_code = inject_log_code(lines, target_method[i])
@@ -446,8 +550,11 @@ def main(package_name):
                 
                 #跳出循环
                 break
+<<<<<<< HEAD
             
     recompile_apk(package_name)
+=======
+>>>>>>> 895e6693d16628de4e01c6d45dfc7c49155376c5
   
   
 if __name__ == '__main__':  
