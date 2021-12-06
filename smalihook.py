@@ -1,54 +1,97 @@
 import os  
   
   
-#使用register_list来管理寄存器
-register_list = []
-register_index = -1
 
 #存储火焰图的类和方法
 target_class = []
 target_method = []
+map_class_method = {}
 
 class ParserError(Exception):  
     pass  
 
-#每次都获取一个寄存器，循环利用
-def get_register():
-    global register_index
-    register_index += 1
-    register_index %= len(register_list)
-    return register_list[register_index]
 
-
-#把自己定义好的Log类插入到App中
-def insert_mylog(package_name):
-    root_path = os.path.join(package_name, 'smali')
-    #判断是否存在当前文件夹pacage_name/smali
-    is_exist_folder = os.path.exists(root_path)
+#log的时候添加的所要log的值,插入参数的模版
+def add_parameters(parameter_list):
+    #print(parameter_list)
     
-    if is_exist_folder:
-        #创建文件夹package_name/samli/gosec/mylog
-        mylog_location = os.path.join(root_path, 'gosec', 'mylog')
-        if not os.path.exists(mylog_location):
-            os.makedirs(mylog_location)
-        print("successful!")
+    add_parameters_inject_code = ['\n']
+    
+    for each_para in parameter_list:
+        if each_para != '':
+            #print(each_para)
+            add_para = '    invoke-static/range {'+ each_para +' .. ' + each_para + '}, Lgosec/mylog/Log;->add(Ljava/lang/Object;)V\n'
+            add_parameters_inject_code.append(add_para)
+            add_parameters_inject_code.append('\n')
+    
+    add_parameters_inject_code.append('    invoke-static {}, Lgosec/mylog/Log;->stopAdding()V\n')
+    add_parameters_inject_code.append('\n')
+    
+    return add_parameters_inject_code
+
+def add_stack_log():
+    return [
+        '\n',
+        '    invoke-static {}, Lgosec/mylog/LogInvokeStack;->log()V\n',
+        '\n'
+    ]
+    
+#把自己定义好的Log类插入到App中
+def insert_mylog_smali_file(package_name):
+    #要插入apk的位置
+    app_path = os.path.join('.', package_name)
+    #smali_code/gosec/mylog,这个位置存放的是已经写好的要插入到apk中的Log文件
+    mylog_smali_path = os.path.join('.', 'smali_code', 'gosec', 'mylog')
+    dir_list = os.listdir(app_path)
+    mylog_smalis = os.listdir(mylog_smali_path)
+    print(dir_list)
+    smali_list = []
+    for each_dir in dir_list:
+        if 'smali' in each_dir:
+            smali_list.append(each_dir)
+            
+    print(smali_list)
+    length = len(smali_list)
+    
+    #创建新的smali文件夹,判断smali当前的文件最大是多少,要新创建多一个文件夹
+    if length == 1:
+        mylog_location = os.path.join(app_path, 'smali_classes2', 'gosec', 'mylog')
+    elif length > 1:
+        smali_count_list = []
+        for each_file in smali_list:
+            index = each_file.find('classes')
+            if index != -1:
+                smali_file_count = int(each_file[index + 7:])
+                smali_count_list.append(smali_file_count)
+            
+        max_value = max(smali_count_list)
+            
+        mylog_location = os.path.join(app_path, 'smali_classes' + str(max_value + 1), 'gosec', 'mylog')
         
-        #把smali写入到gosec/mylog文件夹下
-        mylog_smali = os.path.join(mylog_location, 'Log.smali')
-        #需要把已经写好的smali文件放入到当前的文件夹下
-        current_smali = os.path.join(os.getcwd(), 'Log.smali')
+    print(mylog_location)
         
-        r = open(current_smali, 'r')
+    
+    if not os.path.exists(mylog_location):
+        os.makedirs(mylog_location)
+        
+    
+    #把本地的Log文件写入到App的smali文件夹中
+    for smali_file in mylog_smalis:
+        read_path = os.path.join(mylog_smali_path, smali_file)
+        write_path = os.path.join(mylog_location, smali_file)
+        
+        r = open(read_path, 'r')
+        f = open(write_path, 'w')
+        
         lines = r.readlines()
-        
-        f = open(mylog_smali, 'w')
         f.writelines(lines)
         
         r.close()
         f.close()
         
-    else:
-        print(root_path + 'is not exist')
+        
+    print('successful!!!')
+    
 
 
 #计算函数传入参数的个数,传入的格式为([BLjava/io/InputStream;Ljava/io/OutputStream;)
@@ -83,41 +126,29 @@ def count_arguments(arguments):
 
 
 ##生成log参数和stacktrace的smali代码
-def generate_log_parameters(arguments, argument_count, is_static):
+def generate_log_parameters(argument_count, is_static):
+    if argument_count == 0:
+        return []
     
+    inject_code = []
+    paras_list = []
     #静态和非静态对应的其实参数符号不同
     if is_static:
-        if argument_count > 1:
-            current_parameter = '{p0 .. p' + str(argument_count - 1) + '}'
-        elif argument_count == 1:
-            current_parameter = '{p0}'
+        for i in range(1, argument_count + 1):
+            paras_list.append('p' + str(i))
     else:
-        if argument_count > 1:
-            current_parameter = '{p1 .. p' + str(argument_count) + '}'
-        elif argument_count == 1:
-            current_parameter = '{p1}'
-    #插入log参数和调用栈的smali语句
+        for i in range(0, argument_count):
+            paras_list.append('p' + str(i))
     
-    #如果没有参数的话就直接打印调用栈
-    if argument_count == 0:
-        inject_code = [
-            '\n',
-            '    invoke-static {}, Lcn/log/Log;->getStack()Ljava/lang/String;'
-            '\n'
-        ]
-    #如果有参数则log参数
-    elif argument_count > 0:
-        inject_code = [
-            '\n',
-            '    invoke-static {}, Lcn/log/Log;->getStack()Ljava/lang/String;'
-            '\n',
-            '\n',
-            '    invoke-static/range ' + current_parameter + ', Lcn/log/Log;->log' + arguments + 'Ljava/lang/String;',
-            '\n'
-        ]
-    #出错了,返回空列表
-    else:
-        inject_code = []
+    #生成log参数的代码
+    add_code = add_parameters(paras_list)
+    
+    inject_code.extend(add_code)
+    
+    inject_code.extend([
+        '    invoke-static {}, Lgosec/mylog/Log;->logParameters()V\n',
+        '\n'
+    ])
     
     return inject_code
     
@@ -143,7 +174,7 @@ def inject_code_to_method_section(method_section):
     
     #获取当前的函数的函数名，参数类型和返回值类型
     method_define = method_section[0]
-    print(method_define)
+    #print(method_define)
     for i in range(0, len(method_define)):
         char_line = method_define[i]
         if char_line == '(':
@@ -154,9 +185,9 @@ def inject_code_to_method_section(method_section):
             arguments = method_define[argu_start:argu_end]
             return_type = method_define[argu_end: len(method_define)]
             
-    print(method_des)
-    print(arguments)
-    print(return_type)
+    # print(method_des)
+    # print(arguments)
+    # print(return_type)
     
     
     #获取参数的个数
@@ -164,95 +195,180 @@ def inject_code_to_method_section(method_section):
     
     #记录是否要开始插桩
     start_inject = False
+    
     #记录是否插入了参数和调用栈
     is_inject_para_stack = False
+    
+    is_return = False
 
     # 这里是插桩的逻辑
     for i in range(0, len(method_section)):  
-        statement = method_section[i]
+        raw_statement = method_section[i]
+        statement = method_section[i].strip()
+        result_method.append(raw_statement + '\n')
         
         #找到配置寄存器的个数
-        if statement.find(".locals") != -1:
+        if statement.startswith(".locals") and not start_inject:
+            #print('statement = :' + statement)
             #开始插桩
             start_inject = True
-            locals_line = statement.split(" ")
-            local_count = locals_line[len(locals_line) - 1]
-            local_count = int(local_count)
-            #改为14
-            new_local_count = 14
-            statement = "    .locals " + str(new_local_count) + "\n"
-            
-            #生成可用的寄存器
-            global register_list
-            for j in range(local_count, new_local_count):
-                register_list.append("v" + str(j))
+                      
+            #打印调用栈
+            result_method.extend(add_stack_log())
                 
+            #判断是否静态,对应的参数起始符号不一样
+            if 'static' in method_des:
+                log_para_inject = generate_log_parameters(argument_count, True)
+            else:
+                log_para_inject = generate_log_parameters(argument_count, False)
+                    
+            #插入代码
+            if len(log_para_inject) != 0:
+                result_method.extend(log_para_inject)
+            #result_method.append(statement + '\n')
             continue
         
         if start_inject:
             #开始插桩...
             #log参数和调用栈的代码插桩
-            if statement == '\n' and not is_inject_para_stack:
+            # if statement == '\n' and not is_inject_para_stack:
                 
-                #判断是否静态,对应的参数起始符号不一样
-                if 'static' in method_des:
-                    log_para_inject = generate_log_parameters(arguments, argument_count, True)
-                else:
-                    log_para_inject = generate_log_parameters(arguments, argument_count, False)
+            #     #打印调用栈
+            #     result_method.extend(add_stack_log())
+                
+            #     #判断是否静态,对应的参数起始符号不一样
+            #     if 'static' in method_des:
+            #         log_para_inject = generate_log_parameters(argument_count, True)
+            #     else:
+            #         log_para_inject = generate_log_parameters(argument_count, False)
                     
-                #插入代码
-                if len(log_para_inject) != 0:
-                    result_method.extend(log_para_inject)
+            #     #插入代码
+            #     if len(log_para_inject) != 0:
+            #         result_method.extend(log_para_inject)
+                
                     
-                is_inject_para_stack = True
+            #     is_inject_para_stack = True
+            #     #跳过接下来的操作
+            #     continue
+            
+            #找到调用函数的地方了
+            if statement.startswith('move-result-object'):
+                # print('===================================')
+                # print(method_section[i - 2:i + 1])
+                #获取到invoke到return的语句
+                invoke_return_smali = method_section[i - 2: i + 1]
+                #类似于invoke-static {v0, v1}, Lcom/mob/commons/b;->a(Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;
+                invoke_smali = invoke_return_smali[0].strip()
+                #类似于move-result-object v0
+                return_smali = invoke_return_smali[2].strip()
+                
+                #操作字符串
+                start = invoke_smali.find('{')
+                end = invoke_smali.find('}')
+                
+                return_info = return_smali.split(' ')
+                
+                #类似于v0, v1
+                invoke_paras_raw = invoke_smali[start + 1: end]
+                #print('invoke_paras_raw = ' + str(invoke_paras_raw))
+                #类似于v0
+                return_para = return_info[1]
+                
+                #类似于[v0, v1]
+                invoke_paras = invoke_paras_raw.split(', ')
+                #print('last_invoke_paras = ' + str(invoke_paras))
+                
+                #插入add参数的log方法
+                log_paras = add_parameters(invoke_paras)
+                log_paras.extend(invoke_return_smali)
+                log_paras.append('\n')
+                
+                #插入log函数调用返回值的操作
+                if invoke_smali.startswith('invoke'):
+                    if invoke_smali.startswith('invoke-static'):
+                        #静态调用
+                        log_paras.extend([
+                            '    invoke-static/range {' + return_para + ' .. ' + return_para + '}, Lgosec/mylog/Log;->logStaticNonVoid(Ljava/lang/Object;)V\n',
+                            '\n'
+                        ])
+                    else:
+                        #非静态调用
+                        log_paras.extend([
+                            '    invoke-static/range {' + return_para + ' .. ' + return_para + '}, Lgosec/mylog/Log;->logNonStaticNonVoid(Ljava/lang/Object;)V\n',
+                            '\n'
+                        ])
+                    
+                    #因为读到这一行move-result-object的时候result_method已经读取了之前的两行invoke操作了,所以要先把它去除掉,在插桩上我们的代码
+                    
+                    del result_method[-3:]
+                    result_method.extend(log_paras)
+                
+                #跳过接下来的操作
                 continue
             
-            
-        
-        
-        
-        result_method.append(statement)
-        
-        
-    for line in result_method:
-        print(line)
-            
+            #碰到当前函数的返回值了,可能有switch语句会出现多个return
+            if statement.startswith('return-object'):
                 
-            
-            
-            
+                result_method.pop()
                 
+                return_def = statement.split(' ')
+                return_register = return_def[1]
+                
+                inject_return_log = add_parameters([return_register])
+                #在return之前插入
+                result_method.extend(inject_return_log)
+                result_method.extend([
+                    '    invoke-static {}, Lgosec/mylog/Log;->logReturnVal()V\n',
+                    '\n',
+                    '    ' + statement + '\n',
+                    '\n'
+                ])
         
-        # if method_section[i].find(".prologue") != -1:  
-        #     method_section[i + 1: i + 1] = inject_code
-            #return method_section
-    
-    # for ii in range(0, len(method_section)-1):
-    #     if len(method_section[ii].strip())!= 0 and len(method_section[ii+1].strip()) == 0 :   
-    #         method_section[ii + 1: ii + 1] = inject_code
-    #         #return method_section
-    # return method_section  
+        
+        
+        
+        
+    return result_method
+        
+        
   
   
-def inject_log_code(content, method_i):  
+def inject_log_code(content, method_set):  
+    method_list = list(method_set)
+    #print('method_set = ' + str(method_list))
     new_content = []  
     method_section = []  
     is_method_begin = False  
     #找到对应的函数
     for line in content:  
         #找到对应的函数了
-        if line[:7] == ".method" and method_i in line:  
-            is_method_begin = True
-            method_section.append(line)  
-            continue  
+        if line[:7] == ".method":  
+            str_list = line.split(' ', 3)
+            method_name_raw = str_list[len(str_list) - 1]
+            
+            #print(method_name_raw)
+            # if 'init' in method_i:
+            #     print('method_i = ' + method_i)
+            #     print('method_name = ' + method_name)
+            for each_method in method_list:
+            
+                if str(method_name_raw).strip() == each_method:
+                    #print('find method need to insert:' + method_name_raw)
+                    is_method_begin = True
+                    method_section.append(line)  
+                    break
+            
+            if is_method_begin:
+                continue  
         if is_method_begin:  
             method_section.append(line)  
         else:  
             new_content.append(line)  
         if line[:11] == ".end method" and is_method_begin:  
-            method_section.append(line) 
+            #method_section.append(line) 
             is_method_begin = False  
             #对这个函数插桩代码
+            print()
             new_method_section = inject_code_to_method_section(method_section)  
             new_content.extend(new_method_section)  
             method_section.clear()
@@ -268,12 +384,20 @@ def read_flame_function_list():
     function_list = r.readlines()
     r.close()
     
+    
     for function in function_list:
-        class_method = function.split(" ")[0]
-        index = class_method.rfind('.')
+        #不需要关注线程名字,这个会在Log类中处理
+        if function.startswith('-'):
+            continue
+
+        
+        index = function.rfind('.')
         if index != -1:
-            class_name = class_method[:index]
-            method_name = class_method[index + 1:]
+            class_name = function[:index]
+            method_name = function[index + 1:].replace(' ', '')
+            method_name = method_name.replace('\n','')
+            #print('class_name = ' + class_name)
+            #print('method_name = ' + method_name)
             
             package_list = class_name.split('.')
             
@@ -284,21 +408,44 @@ def read_flame_function_list():
                 #print(package_list[i])
                 class_package_name = os.path.join(class_package_name, package_list[i])
             
-            global target_class
-            global target_method
-            target_class.append(class_package_name)
-            target_method.append(method_name)
-        
-    
+            # global target_class
+            # global target_method
+            # target_class.append(class_package_name)
+            # target_method.append(method_name)
+            
+            global map_class_method
+            if class_package_name in map_class_method.keys():
+                method_set = map_class_method[class_package_name]
+                method_set.add(method_name)
+                map_class_method[class_package_name] = method_set
+            else:
+                map_class_method[class_package_name] = set([method_name])
 
-def main():  
+#利用命令行反编译
+def decompile_apk(package_name):
+    decompile_command = 'java -jar apktool_2.6.0.jar d ' + package_name + '.apk'
+    os.system(decompile_command)
     
+def recompile_apk(package_name):
+    recompile_command = 'java -jar apktool_2.6.0.jar b ' + os.path.join('.', package_name)
+    os.system(recompile_command)
+
+def main(package_name):  
+    
+    #反编译
+    decompile_apk(package_name)
+    #在apk中插入自己的Log类
+    insert_mylog_smali_file(package_name)
+    #读取火焰图
     read_flame_function_list()
-    global target_class
-    global target_method
     
-    #这里后面需要修改对应的apk名字
-    root_path = os.path.join('.', 'demo')
+    # global target_class
+    # global target_method
+    global map_class_method
+    
+    
+    #开始读取smali文件
+    root_path = os.path.join('.', package_name)
     root_dirs = os.listdir(root_path)
     smali_dirs = []
     print(root_dirs)
@@ -308,38 +455,45 @@ def main():
             smali_dirs.append(os.path.join(root_path, dirs))
     
     print(smali_dirs)     
-    for i in range(0, len(target_class)):
+    
+    print('总的smali文件数:' + str(len(map_class_method)))
+    #print('总的插桩方法数为:' + str(len(target_method)))
+    all_count = 0
+    key_count = 0
+    # for i in range(0, len(target_class)):
+    for key in map_class_method.keys():
+        print(key)
+        key_count += 1
         for j in range(0, len(smali_dirs)):
-            class_smali_path = os.path.join(smali_dirs[j], target_class[i] + '.smali')
+            class_smali_path = os.path.join(smali_dirs[j], key + '.smali')
             #找到了文件
             if os.path.exists(class_smali_path):
+                all_count += 1
                 
+                print('现在处理第' + str(all_count) + '文件....')
+                print('class_file = ' + class_smali_path)
                 #这里找到了class和method所在的文件,可以进行接下来的读操作
-                print(class_smali_path)
-                file = open(class_smali_path,'r',encoding='UTF-8')  
-                lines = file.readlines()  
-                file.close()
-                new_code = inject_log_code(lines, target_method[i])
+                smali_file = open(class_smali_path,'r',encoding='UTF-8')  
+                lines = smali_file.readlines()  
+                smali_file.close()
                 
                 
+                #修改smali文件,返回一个新的smali文件
+                #print('插桩的类是' + class_smali_path + '...插桩的方法是' + target_method[i])
+                new_code = inject_log_code(lines, map_class_method[key])
+                smali_file = open(class_smali_path, 'w')
+                smali_file.writelines(new_code)
+                smali_file.close()
+                
+                print('第' + str(all_count) + '个文件处理完毕....')
                 #跳出循环
                 break
-    # walker = os.walk("./")  
-    # for root, directory, files in walker:  
-    #     for file_name in files:  
-    #         file_path = os.path.join(root, file_name)
-    #         print(file_path)  
-              
-            # file = open(file_path, "w")  
-            # file.writelines(new_code)  
-            # file.close()  
-            # i += 1
-            # if i == 100:
-            #     os._exit(0)
+     
+    print('keycount = ' + str(key_count))       
+    #recompile_apk(package_name)
+    print('结束拉======================================================================')
   
   
 if __name__ == '__main__':  
-    read_flame_function_list()
-    main()
-    #read_flame_function_list()
-    #insert_mylog("demo")  
+    main('base')
+    

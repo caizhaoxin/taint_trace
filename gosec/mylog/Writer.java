@@ -1,9 +1,19 @@
 package gosec.mylog;
 
+<<<<<<< HEAD
+<<<<<<< HEAD
+public class Writer {
+    public static void write(String str){
+        System.out.println(str);
+    }
+}
+=======
+=======
 import android.os.Build;
 
 import androidx.annotation.RequiresApi;
 
+>>>>>>> b2063a7fdf45a703158e7ad7baf452a1941d130d
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousFileChannel;
@@ -54,3 +64,8 @@ public class Writer {
         }
     }
 }
+<<<<<<< HEAD
+
+>>>>>>> 76aee522471377b790a59bef54438e2d8fa2a8a1
+=======
+>>>>>>> b2063a7fdf45a703158e7ad7baf452a1941d130d
