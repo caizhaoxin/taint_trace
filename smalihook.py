@@ -1,4 +1,5 @@
 import os  
+
   
   
 
@@ -7,8 +8,42 @@ target_class = []
 target_method = []
 map_class_method = {}
 
+filter_list = ['Z', 'B', 'C', 'D', 'F', 'I', 'J', 'S']
+
+# table_transfer = {
+#     'Z': 'boolean',
+#     'B': 'byte',
+#     'C': 'char',
+#     'D': 'double',
+#     'F': 'float',
+#     'I': 'int',
+#     'J': 'long',
+#     'S': 'short'
+# }
+
 class ParserError(Exception):  
     pass  
+
+def filter_useless_paras(label_list, paras_list, is_static):
+    #print('label_list = ' + str(label_list))
+    #print('param_list = ' + str(paras_list))
+    result_list = []
+    
+    if is_static:
+        for i in range(0, len(paras_list)):
+            if paras_list[i] in filter_list:
+                continue
+            
+            result_list.append(label_list[i])
+    else:
+        result_list.append(label_list[0])
+        for i in range(0, len(paras_list)):
+            if paras_list[i] in filter_list:
+                continue
+            
+            result_list.append(label_list[i + 1])
+ 
+    return result_list
 
 
 #log的时候添加的所要log的值,插入参数的模版
@@ -32,7 +67,7 @@ def add_parameters(parameter_list):
 def add_stack_log():
     return [
         '\n',
-        '    invoke-static {}, Lgosec/mylog/LogInvokeStack;->log()V\n',
+        '    invoke-static {}, Lgosec/mylog/Log;->logInvokeStack()V\n',
         '\n'
     ]
     
@@ -96,37 +131,53 @@ def insert_mylog_smali_file(package_name):
 
 #计算函数传入参数的个数,传入的格式为([BLjava/io/InputStream;Ljava/io/OutputStream;)
 def count_arguments(arguments):
-    arguments = arguments[1:len(arguments) - 1]
-    argumen_count = 0
-    
-    argument_list = arguments.split(";")
-    
-    for i in range(0, len(argument_list)):
-        
-        is_find_array = False
-        for j in range(0, len(argument_list[i])):
-            char = argument_list[i][j]
+    #print('进来了....原始数据为:' + str(arguments))
+    str1 = arguments[1: len(arguments) - 1]
+    final_argument_list = []
+    is_find_array = False
+    is_find_class = False
+    for i in range(0, len(str1)):
+        if str1[i] == 'L' and not is_find_class:
+            clazz_start = i
+            is_find_class = True
             
-            if char != '[' and char != 'L':
-                if is_find_array:
-                    is_find_array = False
-                else:
-                    argumen_count += 1
+            
+        if str1[i] == '[' and not is_find_array:
+            array_start = i
+            is_find_array = True
+            
+        if str1[i] == ';':
+            
+            if is_find_class and is_find_array:
+                final_argument_list.append(str1[clazz_start: i + 1])
+                is_find_array = False
+                is_find_class = False
                 
-            if char == 'L' and not is_find_array:
-                argumen_count += 1
-                break
+            elif is_find_class:
+                final_argument_list.append(str1[clazz_start: i + 1])
+                is_find_class = False
+            
+            elif is_find_array:
+                final_argument_list.append(str1[array_start: i + 1])
+                is_find_array = False
                 
-            if char == '[' and not is_find_array:
-                argumen_count += 1
-                is_find_array = True
+        if str1[i] != 'L' and str1[i] != '[' and str1[i] != ';' and not is_find_class:
+            
+            if is_find_array:
+                final_argument_list.append(str1[array_start: i + 1])
+                is_find_array = False
+        
+            else:
+                final_argument_list.append(str1[i])
                 
-                
-    return argumen_count
+    argument_count = len(final_argument_list)
+    return argument_count, final_argument_list
+
+    
 
 
 ##生成log参数和stacktrace的smali代码
-def generate_log_parameters(argument_count, is_static):
+def generate_log_parameters(arguments, argument_count, is_static):
     if argument_count == 0:
         return []
     
@@ -134,10 +185,20 @@ def generate_log_parameters(argument_count, is_static):
     paras_list = []
     #静态和非静态对应的其实参数符号不同
     if is_static:
-        for i in range(1, argument_count + 1):
+        for i in range(0, argument_count):
+            
+            #判断是否为基本数据类型
+            if arguments[i] in filter_list:
+                continue
+            
             paras_list.append('p' + str(i))
     else:
-        for i in range(0, argument_count):
+        for i in range(1, argument_count + 1):
+            
+            #判断是否为基本数据类型
+            if arguments[i - 1] in filter_list:
+                continue
+            
             paras_list.append('p' + str(i))
     
     #生成log参数的代码
@@ -185,13 +246,9 @@ def inject_code_to_method_section(method_section):
             arguments = method_define[argu_start:argu_end]
             return_type = method_define[argu_end: len(method_define)]
             
-    # print(method_des)
-    # print(arguments)
-    # print(return_type)
-    
     
     #获取参数的个数
-    argument_count = count_arguments(arguments)
+    argument_count, final_argument_list = count_arguments(arguments)
     
     #记录是否要开始插桩
     start_inject = False
@@ -218,38 +275,20 @@ def inject_code_to_method_section(method_section):
                 
             #判断是否静态,对应的参数起始符号不一样
             if 'static' in method_des:
-                log_para_inject = generate_log_parameters(argument_count, True)
+                log_para_inject = generate_log_parameters(final_argument_list, argument_count, True)
             else:
-                log_para_inject = generate_log_parameters(argument_count, False)
+                log_para_inject = generate_log_parameters(final_argument_list, argument_count, False)
                     
             #插入代码
             if len(log_para_inject) != 0:
                 result_method.extend(log_para_inject)
-            #result_method.append(statement + '\n')
+                
+
             continue
         
         if start_inject:
-            #开始插桩...
-            #log参数和调用栈的代码插桩
-            # if statement == '\n' and not is_inject_para_stack:
-                
-            #     #打印调用栈
-            #     result_method.extend(add_stack_log())
-                
-            #     #判断是否静态,对应的参数起始符号不一样
-            #     if 'static' in method_des:
-            #         log_para_inject = generate_log_parameters(argument_count, True)
-            #     else:
-            #         log_para_inject = generate_log_parameters(argument_count, False)
-                    
-            #     #插入代码
-            #     if len(log_para_inject) != 0:
-            #         result_method.extend(log_para_inject)
-                
-                    
-            #     is_inject_para_stack = True
-            #     #跳过接下来的操作
-            #     continue
+            # 开始插桩...
+            # log参数和调用栈的代码插桩
             
             #找到调用函数的地方了
             if statement.startswith('move-result-object'):
@@ -262,6 +301,13 @@ def inject_code_to_method_section(method_section):
                 #类似于move-result-object v0
                 return_smali = invoke_return_smali[2].strip()
                 
+                #获取参数
+                bracket_start = invoke_smali.find('(')
+                bracket_end = invoke_smali.find(')')
+                invoke_paras = invoke_smali[bracket_start: bracket_end + 1]
+                #print('invoke_paras = ' + invoke_paras)
+                argument_count, final_argument_list = count_arguments(invoke_paras)
+                
                 #操作字符串
                 start = invoke_smali.find('{')
                 end = invoke_smali.find('}')
@@ -269,23 +315,62 @@ def inject_code_to_method_section(method_section):
                 return_info = return_smali.split(' ')
                 
                 #类似于v0, v1
-                invoke_paras_raw = invoke_smali[start + 1: end]
+                invoke_label_raw = invoke_smali[start + 1: end]
                 #print('invoke_paras_raw = ' + str(invoke_paras_raw))
                 #类似于v0
                 return_para = return_info[1]
                 
+                
+                #invoke_paras = []
+                invoke_label = []
                 #类似于[v0, v1]
-                invoke_paras = invoke_paras_raw.split(', ')
+                if invoke_label_raw.find(', ') != -1:
+                    invoke_label = invoke_label_raw.split(', ')
+                #类似于{p1 .. p3}
+                elif invoke_label_raw.find(' .. ') != -1:
+                    #类似于[p1, p3]
+                    range_start_end = invoke_label_raw.split(' .. ')
+                    #p1
+                    range_start_label = range_start_end[0]
+                    #p3
+                    range_end_label = range_start_end[1]
+                    #1
+                    start_count = range_start_label[1:]
+                    #3
+                    end_count = range_end_label[1:]
+                    #p
+                    label = range_start_label[0]
+                    
+                    #[p1, p2, p3]
+                    for k in range(int(start_count), int(end_count) + 1):
+                        invoke_label.append(label + str(k))
+                        
+                elif invoke_label_raw.find(', ') == -1 and invoke_label_raw.find(' .. ') == -1:
+                    invoke_label = [invoke_label_raw]
                 #print('last_invoke_paras = ' + str(invoke_paras))
                 
+                
+                filtered_paras_list = []
+                is_invoke_static = False
+                #筛掉没用的符号和参数
+                if invoke_smali.startswith('invoke-static'):
+                    #静态调用
+                    filtered_paras_list = filter_useless_paras(invoke_label, final_argument_list, True)
+                    is_invoke_static = True
+                else:
+                    #非静态调用
+                    filtered_paras_list = filter_useless_paras(invoke_label, final_argument_list, False)
+                
+                
+                
                 #插入add参数的log方法
-                log_paras = add_parameters(invoke_paras)
+                log_paras = add_parameters(filtered_paras_list)
                 log_paras.extend(invoke_return_smali)
                 log_paras.append('\n')
                 
                 #插入log函数调用返回值的操作
                 if invoke_smali.startswith('invoke'):
-                    if invoke_smali.startswith('invoke-static'):
+                    if is_invoke_static:
                         #静态调用
                         log_paras.extend([
                             '    invoke-static/range {' + return_para + ' .. ' + return_para + '}, Lgosec/mylog/Log;->logStaticNonVoid(Ljava/lang/Object;)V\n',
@@ -368,7 +453,7 @@ def inject_log_code(content, method_set):
             #method_section.append(line) 
             is_method_begin = False  
             #对这个函数插桩代码
-            print()
+            #print()
             new_method_section = inject_code_to_method_section(method_section)  
             new_content.extend(new_method_section)  
             method_section.clear()
@@ -427,7 +512,7 @@ def decompile_apk(package_name):
     os.system(decompile_command)
     
 def recompile_apk(package_name):
-    recompile_command = 'java -jar apktool_2.6.0.jar b ' + os.path.join('.', package_name)
+    recompile_command = 'java -jar apktool_2.6.0.jar b ' + os.path.join('.', package_name) + ' -o ' + os.path.join('.', 'result.apk')
     os.system(recompile_command)
 
 def main(package_name):  
@@ -448,13 +533,13 @@ def main(package_name):
     root_path = os.path.join('.', package_name)
     root_dirs = os.listdir(root_path)
     smali_dirs = []
-    print(root_dirs)
+    #print(root_dirs)
     #找到apk目录下存在的smali文件夹
     for dirs in root_dirs:
         if 'smali' in dirs:
             smali_dirs.append(os.path.join(root_path, dirs))
     
-    print(smali_dirs)     
+    #print(smali_dirs)     
     
     print('总的smali文件数:' + str(len(map_class_method)))
     #print('总的插桩方法数为:' + str(len(target_method)))
@@ -470,8 +555,11 @@ def main(package_name):
             if os.path.exists(class_smali_path):
                 all_count += 1
                 
+                
+                
+                
                 print('现在处理第' + str(all_count) + '文件....')
-                print('class_file = ' + class_smali_path)
+                #print('class_file = ' + class_smali_path)
                 #这里找到了class和method所在的文件,可以进行接下来的读操作
                 smali_file = open(class_smali_path,'r',encoding='UTF-8')  
                 lines = smali_file.readlines()  
@@ -489,7 +577,7 @@ def main(package_name):
                 #跳出循环
                 break
      
-    print('keycount = ' + str(key_count))       
+    #print('keycount = ' + str(key_count))       
     #recompile_apk(package_name)
     print('结束拉======================================================================')
   
