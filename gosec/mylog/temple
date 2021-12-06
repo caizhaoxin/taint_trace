@@ -1,7 +1,7 @@
 
 
 // 打印调用栈
-invoke-static {}, Lgosec/mylog/LogInvokeStack;->log()V
+invoke-static {}, Lgosec/mylog/Log;->logInvokeStack()V
 
 // 注意：add完后必须要stop，然后log才有效！
 // 打印参数 有多少参数，就放几个v进去！
