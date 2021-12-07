@@ -428,7 +428,7 @@ def inject_log_code(content, method_set):
     for line in content:  
         #找到对应的函数了
         if line[:7] == ".method":  
-            str_list = line.split(' ', 3)
+            str_list = line.split(' ')
             method_name_raw = str_list[len(str_list) - 1]
             
             #print(method_name_raw)
