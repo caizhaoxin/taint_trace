@@ -1,5 +1,5 @@
 import os  
-
+import read_xml
   
   
 
@@ -72,7 +72,7 @@ def add_stack_log():
     ]
     
 #把自己定义好的Log类插入到App中
-def insert_mylog_smali_file(package_name):
+def insert_mylog_smali_file(package_name, app_package_name):
     #要插入apk的位置
     app_path = os.path.join('.', package_name)
     #smali_code/gosec/mylog,这个位置存放的是已经写好的要插入到apk中的Log文件
@@ -118,7 +118,16 @@ def insert_mylog_smali_file(package_name):
         r = open(read_path, 'r')
         f = open(write_path, 'w')
         
+        
         lines = r.readlines()
+        #修改写入log的位置,必须是当前apk的包名
+        if read_path.endswith('Writer.smali'):
+            for i in range(0, len(lines)):
+                line = lines[i]
+                if line.startswith('.field public static packageName:Ljava/lang/String;'):
+                    lines[i] = '.field public static packageName:Ljava/lang/String; = "' + app_package_name + '"' + '\n'
+                    break
+                
         f.writelines(lines)
         
         r.close()
@@ -520,7 +529,7 @@ def main(package_name):
     #反编译
     decompile_apk(package_name)
     #在apk中插入自己的Log类
-    insert_mylog_smali_file(package_name)
+    insert_mylog_smali_file(package_name, read_xml.get_app_package_name(package_name))
     #读取火焰图
     read_flame_function_list()
     
@@ -548,6 +557,10 @@ def main(package_name):
     # for i in range(0, len(target_class)):
     for key in map_class_method.keys():
         print(key)
+        
+        if key.startswith('com/networkbench'):
+            continue
+        
         key_count += 1
         for j in range(0, len(smali_dirs)):
             class_smali_path = os.path.join(smali_dirs[j], key + '.smali')
