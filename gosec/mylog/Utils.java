@@ -6,7 +6,8 @@ import java.util.Set;
 
 public class Utils {
     private static final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");//设置日期格式
-    private static final String line = "------------------------------------------------------------------------------";
+    protected static final String longLine = "****************************************************************************************************************";
+    protected static final String shortLine = "-----------------------------------------";
     private static final Set<String> primitiveTypeSet = new HashSet<>();
 
     static {
@@ -29,6 +30,13 @@ public class Utils {
         primitiveTypeSet.add("S");
     }
 
+    protected static String getCurrentTimeMillis(){
+        return Long.toString(System.currentTimeMillis());
+    }
+    protected static String getCurrentTimeFormat(){
+        return df.format(System.currentTimeMillis());
+    }
+
     protected static String head() {
         StringBuffer sb = new StringBuffer();
         // 当前时间
@@ -49,9 +57,9 @@ public class Utils {
     }
 
     protected static String endLine(String str) {
-        return str + "\n" +
+        return str +
                 "End Time: " + System.currentTimeMillis() + " " + df.format(System.currentTimeMillis()) + "\n" +
-                line + "\n";
+                shortLine + "\n";
     }
 
     protected static String logData(String type, Object... objs) {
@@ -63,30 +71,38 @@ public class Utils {
 
     protected static String handleParas(String type, Object... objs) {
         StringBuilder sb = new StringBuilder();
-        if (objs.length == 0) sb.append(indent(4) + "no parameter\n");
+        if (type == null) sb.append(indent(4) + "type can not be null!!!\n");
+        else if (objs == null || objs.length == 0) sb.append(indent(4) + "no parameter\n");
         else {
             for (int i = 0; i < objs.length; i++) {
-                sb.append(indent(4) + type + " " + i + ": " + objs[i].getClass().getName() + " -> " + handlePara(objs[i]) + "\n");
+                Object obj = objs[i];
+                if (obj == null) sb.append(indent(4) + type + " " + i + " is null\n");
+                else
+                    sb.append(indent(4) + type + " " + i + ": " + obj.getClass().getName() + " -> " + handlePara(obj)+"\n");
             }
         }
         return sb.toString();
     }
 
     protected static String handlePara(Object obj) {
-        String objType = obj.getClass().getName();
-        if (objType.equals("[B"))
-            return new String((byte[]) obj);
-        // 检测是否为以为数组 目前只考虑一维数组 并且基础类型地不考虑 byte[] 除外
-        int l = 0;
-        while (l < objType.length() && objType.charAt(l) == '[') l++;
-        objType = objType.substring(l);
-        if (l > 0 && !primitiveTypeSet.contains(objType)) {
-            Object[] objs = (Object[]) obj;
-            StringBuilder sb = new StringBuilder("\n");
-            for (int i = 0; i < objs.length; i++)
-                sb.append(indent(8) + String.format("[%d] -> ", i) + objs[i].toString() + (i == objs.length - 1 ? "" : "\n"));
-            return sb.toString();
-        }
+        if (obj == null) return "null";
+//        String objType = obj.getClass().getName();
+//        if (objType.equals("[B"))
+//            return new String((byte[]) obj);
+//        // 检测是否为以为数组 目前只考虑一维数组 并且基础类型地不考虑 byte[] 除外
+//        int l = 0;
+//        while (l < objType.length() && objType.charAt(l) == '[') l++;
+//        objType = objType.substring(l);
+//        if (l > 0 && !primitiveTypeSet.contains(objType)) {
+//            Object[] objs = (Object[]) obj;
+//            StringBuilder sb = new StringBuilder("\n");
+//            for (int i = 0; i < objs.length; i++) {
+//                if (objs[i] == null) sb.append(indent(8) + String.format("[%d] -> ", i) + " is null\n");
+//                else
+//                    sb.append(indent(8) + String.format("[%d] -> ", i) + objs[i].toString() + (i == objs.length - 1 ? "" : "\n"));
+//            }
+//            return sb.toString();
+//        }
         return obj.toString();
     }
 }
