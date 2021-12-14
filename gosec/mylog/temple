@@ -1,9 +1,9 @@
 
 // 开始
-invoke-static {}, Lgosec/mylog/LogInvokeStack;->start()V
+invoke-static {}, Lgosec/mylog/Log;->start()V
 
 // 打印调用栈，尽管这个方法是独立的，但建议放在start后面
-invoke-static {}, Lgosec/mylog/LogInvokeStack;->log()V
+invoke-static {}, Lgosec/mylog/Log;->log()V
 // 注意：add完后必须要stop，然后log才有效！
 // 因为我担心寄存器vn， n可能大于14时，直接invoke-static会报错，所以干脆直接invoke-static/range
 // 打印参数 有多少参数，就放几个v进去！
@@ -58,4 +58,4 @@ invoke-static {}, Lgosec/mylog/Log;->stopAdding()V
 invoke-static/range {v7 .. v7}, Lgosec/mylog/Log;->logNonStaticNonVoid(Ljava/lang/Object;)V
 
 // 结束，注：必须要在return之前放这玩意
-invoke-static {}, Lgosec/mylog/LogInvokeStack;->end()V
+invoke-static {}, Lgosec/mylog/Log;->end()V

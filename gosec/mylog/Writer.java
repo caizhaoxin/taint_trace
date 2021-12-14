@@ -12,8 +12,8 @@ public class Writer {
     static {
         packageName = "cn.log";
         fileName = "data.txt";
-        String path = String.format("/data/data/%s/%s", packageName, fileName);
-//        String path = String.format("./data.txt");
+//        String path = String.format("/data/data/%s/%s", packageName, fileName);
+        String path = String.format("./data.txt");
         File file = new File(path);
         if (!file.getParentFile().exists()) {
             boolean result = file.getParentFile().mkdirs();
@@ -44,11 +44,11 @@ public class Writer {
     // bufferWriter
     public static void write(String content) {
         System.out.println(content);
-//        try {
-//            bufferedWriter.write(content);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+        try {
+            bufferedWriter.write(content);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 //    @RequiresApi(api = Build.VERSION_CODES.O)

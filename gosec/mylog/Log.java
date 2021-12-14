@@ -31,7 +31,7 @@ public class Log {
         StackTraceElement[] stackElements = new Throwable().getStackTrace();
         String end1 = String.format("Method End Time: %s %s\n", Utils.getCurrentTimeMillis(), Utils.getCurrentTimeFormat());
         String end2 = String.format("Method Name: %s.%s End!\n", stackElements[1].getClassName(), stackElements[1].getMethodName());
-        String logData = logDataLocal.get().pop().append(end1 + end2 + Utils.longLine).toString();
+        String logData = logDataLocal.get().pop().append(end1 + end2 + Utils.longLine + "\n").toString();
         Writer.write(logData);
     }
 
