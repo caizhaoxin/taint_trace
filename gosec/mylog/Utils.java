@@ -84,25 +84,36 @@ public class Utils {
         return sb.toString();
     }
 
+    public static void main(String[] args) {
+        handlePara("123123");
+    }
     protected static String handlePara(Object obj) {
         if (obj == null) return "null";
-//        String objType = obj.getClass().getName();
-//        if (objType.equals("[B"))
-//            return new String((byte[]) obj);
-//        // 检测是否为以为数组 目前只考虑一维数组 并且基础类型地不考虑 byte[] 除外
-//        int l = 0;
-//        while (l < objType.length() && objType.charAt(l) == '[') l++;
-//        objType = objType.substring(l);
-//        if (l > 0 && !primitiveTypeSet.contains(objType)) {
-//            Object[] objs = (Object[]) obj;
-//            StringBuilder sb = new StringBuilder("\n");
-//            for (int i = 0; i < objs.length; i++) {
-//                if (objs[i] == null) sb.append(indent(8) + String.format("[%d] -> ", i) + " is null\n");
-//                else
-//                    sb.append(indent(8) + String.format("[%d] -> ", i) + objs[i].toString() + (i == objs.length - 1 ? "" : "\n"));
-//            }
-//            return sb.toString();
-//        }
-        return obj.toString();
+        String ans = "";
+        try{
+            ans = obj.toString();
+        }catch (Exception e){
+            ans = e.toString();
+        }
+        return ans;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
