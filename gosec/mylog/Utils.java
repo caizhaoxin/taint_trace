@@ -84,11 +84,17 @@ public class Utils {
         return sb.toString();
     }
 
-    public static void main(String[] args) {
-        handlePara("123123");
-    }
     protected static String handlePara(Object obj) {
         if (obj == null) return "null";
+        // 防止toString里面也插了这玩意，循环调用toString，然后死循环
+        String objName = obj.getClass().getName();
+        StackTraceElement[] stackElements = new Throwable().getStackTrace();
+        for(int i=2; i<=6 && i<stackElements.length; i++){
+            StackTraceElement stackTraceElement = stackElements[i];
+            if(stackTraceElement.getClassName().equals(objName) && stackTraceElement.getMethodName().equals("toString"))
+                return "Endless loop";
+        }
+        // 处理返回
         String ans = "";
         try{
             ans = obj.toString();
@@ -98,7 +104,6 @@ public class Utils {
         return ans;
     }
 }
-
 
 
 

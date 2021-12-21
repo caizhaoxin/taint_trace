@@ -1,6 +1,7 @@
 package gosec.mylog;
 
 import java.util.Stack;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Log {
     /**
@@ -10,12 +11,18 @@ public class Log {
      * @description: 用于记录方法的所有参数，一般用在开头输出所有参数
      * @return:
      */
-    static ThreadLocal<Stack<StringBuilder>> logDataLocal = new ThreadLocal<>();
+    private static AtomicLong index = new AtomicLong(1);
+
+    static ThreadLocal<Stack<String>> logDataLocal = new ThreadLocal<>();
     static ThreadLocal<DataStack> threadLocal = new ThreadLocal<>();
 
     private static void checkLocal() {
         if (logDataLocal.get() == null) logDataLocal.set(new Stack<>());
         if (threadLocal.get() == null) threadLocal.set(new DataStack());
+    }
+    private static String getHash(){
+        String res = Long.toString(index.getAndIncrement());
+        return res;
     }
 
     public static void start() {
@@ -23,7 +30,11 @@ public class Log {
         StackTraceElement[] stackElements = new Throwable().getStackTrace();
         String head1 = String.format("Method Name: %s.%s\n", stackElements[1].getClassName(), stackElements[1].getMethodName());
         String head2 = String.format("Method Start Time: %s %s\n", Utils.getCurrentTimeMillis(), Utils.getCurrentTimeFormat());
-        logDataLocal.get().push(new StringBuilder(head1 + head2 + Utils.shortLine + "\n"));
+        String content = head1 + head2 + Utils.shortLine + "\n";
+        Stack<String> stack = logDataLocal.get();
+        stack.push(getHash());
+        Writer.deleteFileByFileName(stack.peek());
+        Writer.write(stack.peek(), content, false);
     }
 
     public static void end() {
@@ -31,13 +42,10 @@ public class Log {
         StackTraceElement[] stackElements = new Throwable().getStackTrace();
         String end1 = String.format("Method End Time: %s %s\n", Utils.getCurrentTimeMillis(), Utils.getCurrentTimeFormat());
         String end2 = String.format("Method Name: %s.%s End!\n", stackElements[1].getClassName(), stackElements[1].getMethodName());
-        String logData = logDataLocal.get().pop().append(end1 + end2 + Utils.longLine + "\n").toString();
-        Writer.write(logData);
-    }
-
-    public static void main(String[] args) {
-        start();
-        end();
+        String content = end1 + end2 + Utils.longLine + "\n";
+        Stack<String> stack = logDataLocal.get();
+        String curHash = stack.pop();
+        Writer.write(curHash, content, true);
     }
 
     public static void add(Object obj) {
@@ -59,8 +67,8 @@ public class Log {
         Object[] objs = new Object[stack.size()];
         for (int i = 0; i < objs.length; i++) objs[i] = stack.pop();
         String res = "logParameters: \n" + Utils.head() + "parameter:\n" + Utils.logData("parameter", objs);
-        logDataLocal.get().peek().append(Utils.endLine(res));
-        //Writer.write(Utils.endLine(res));
+        String content = Utils.endLine(res);
+        Writer.write(logDataLocal.get().peek(), content, false);
     }
 
 
@@ -74,11 +82,11 @@ public class Log {
             for (int i = 1; i < stackElements.length; i++) {
                 sb.append(Utils.indent(4) + stackElements[i].toString() + "\n");
             }
-        } else{
+        } else {
             sb.append("invoke stack here is null, unknown reason\n");
         }
-        logDataLocal.get().peek().append("getStack: \n" + Utils.endLine(sb.toString()));
-        //Writer.write("getStack: \n" + Utils.endLine(sb.toString()));
+        String content = "getStack: \n" + Utils.endLine(sb.toString());
+        Writer.write(logDataLocal.get().peek(), content, false);
     }
 
 
@@ -89,8 +97,8 @@ public class Log {
         Object[] objs = new Object[stack.size()];
         for (int i = 0; i < objs.length; i++) objs[i] = stack.pop();
         String res = "logReturnVal: \n" + Utils.head() + "return val:\n" + Utils.logData("retVal", objs);
-        logDataLocal.get().peek().append(Utils.endLine(res));
-//        Writer.write(Utils.endLine(res));
+        String content = Utils.endLine(res);
+        Writer.write(logDataLocal.get().peek(), content, false);
     }
 
 
@@ -101,8 +109,8 @@ public class Log {
         Object[] objs = new Object[stack.size()];
         for (int i = 0; i < objs.length; i++) objs[i] = stack.pop();
         String res = "logVariables: \n" + Utils.head() + "variable:\n" + Utils.logData("vari", objs);
-        logDataLocal.get().peek().append(Utils.endLine(res));
-//        Writer.write(Utils.endLine(res));
+        String content = Utils.endLine(res);
+        Writer.write(logDataLocal.get().peek(), content, false);
     }
 
 
@@ -122,8 +130,8 @@ public class Log {
         sb.append("invoke parameters: \n");
         sb.append(Utils.logData("para", objs));
         sb.append("return type is void\n");
-        logDataLocal.get().peek().append(Utils.endLine(sb.toString()));
-//        Writer.write(Utils.endLine(sb.toString()));
+        String content = Utils.endLine(sb.toString());
+        Writer.write(logDataLocal.get().peek(), content, false);
     }
 
 
@@ -142,10 +150,9 @@ public class Log {
             sb.append("invoke source: " + source.getClass().getName() + " -> " + Utils.handlePara(source) + "\n");
         sb.append("invoke parameters: \n");
         sb.append(Utils.logData("para", objs));
-//        System.out.println("result"+result);
         sb.append("invoke result:\n" + Utils.handleParas("res", result));
-        logDataLocal.get().peek().append(Utils.endLine(sb.toString()));
-//        Writer.write(Utils.endLine(sb.toString()));
+        String content = Utils.endLine(sb.toString());
+        Writer.write(logDataLocal.get().peek(), content, false);
     }
 
 
@@ -161,8 +168,8 @@ public class Log {
         sb.append("invoke parameters: \n");
         sb.append(Utils.logData("para", objs));
         sb.append("return type is void\n");
-        logDataLocal.get().peek().append(Utils.endLine(sb.toString()));
-//        Writer.write(Utils.endLine(sb.toString()));
+        String content = Utils.endLine(sb.toString());
+        Writer.write(logDataLocal.get().peek(), content, false);
     }
 
 
@@ -178,7 +185,7 @@ public class Log {
         sb.append("invoke parameters: \n");
         sb.append(Utils.logData("para", objs));
         sb.append("invoke result:\n" + Utils.handleParas("res", obj));
-        logDataLocal.get().peek().append(Utils.endLine(sb.toString()));
-//        Writer.write(Utils.endLine(sb.toString()));
+        String content = Utils.endLine(sb.toString());
+        Writer.write(logDataLocal.get().peek(), content, false);
     }
 }
