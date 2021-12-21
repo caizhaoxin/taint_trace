@@ -5,27 +5,17 @@
 .implements Ljava/lang/Runnable;
 
 
-# static fields
-.field public static final synthetic INSTANCE:Lgosec/mylog/Writer$$ExternalSyntheticLambda0;
+# instance fields
+.field public final synthetic f$0:I
 
 
 # direct methods
-.method static synthetic constructor <clinit>()V
-    .locals 1
-
-    new-instance v0, Lgosec/mylog/Writer$$ExternalSyntheticLambda0;
-
-    invoke-direct {v0}, Lgosec/mylog/Writer$$ExternalSyntheticLambda0;-><init>()V
-
-    sput-object v0, Lgosec/mylog/Writer$$ExternalSyntheticLambda0;->INSTANCE:Lgosec/mylog/Writer$$ExternalSyntheticLambda0;
-
-    return-void
-.end method
-
-.method private synthetic constructor <init>()V
+.method public synthetic constructor <init>(I)V
     .locals 0
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
+
+    iput p1, p0, Lgosec/mylog/Writer$$ExternalSyntheticLambda0;->f$0:I
 
     return-void
 .end method
@@ -33,9 +23,11 @@
 
 # virtual methods
 .method public final run()V
-    .locals 0
+    .locals 1
 
-    invoke-static {}, Lgosec/mylog/Writer;->lambda$static$0()V
+    iget v0, p0, Lgosec/mylog/Writer$$ExternalSyntheticLambda0;->f$0:I
+
+    invoke-static {v0}, Lgosec/mylog/Writer;->lambda$static$0(I)V
 
     return-void
 .end method

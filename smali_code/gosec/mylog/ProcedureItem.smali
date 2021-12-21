@@ -18,18 +18,18 @@
     .param p2, "content"    # Ljava/lang/String;
     .param p3, "over"    # Z
 
-    .line 19
+    .line 21
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 
-    .line 20
+    .line 22
     iput-object p1, p0, Lgosec/mylog/ProcedureItem;->fileName:Ljava/lang/String;
 
-    .line 21
+    .line 23
     iput-object p2, p0, Lgosec/mylog/ProcedureItem;->content:Ljava/lang/String;
 
-    .line 22
+    .line 24
     iput-boolean p3, p0, Lgosec/mylog/ProcedureItem;->over:Z
 
-    .line 23
+    .line 25
     return-void
 .end method
