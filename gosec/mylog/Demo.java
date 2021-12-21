@@ -129,7 +129,7 @@ public class Demo {
 //                e.printStackTrace();
 //            }
         }
-        System.out.println("获取apk入口类信息成功===耗时:" + ((System.currentTimeMillis() - time) / 1000) + "s\n\n");
+        System.out.println("cost time:" + ((System.currentTimeMillis() - time) / 1000) + "s\n\n");
     }
 }
 

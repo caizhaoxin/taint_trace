@@ -4,8 +4,6 @@
 
 
 # static fields
-.field private static index:Ljava/util/concurrent/atomic/AtomicLong;
-
 .field static logDataLocal:Ljava/lang/ThreadLocal;
     .annotation system Ldalvik/annotation/Signature;
         value = {
@@ -30,25 +28,16 @@
 
 # direct methods
 .method static constructor <clinit>()V
-    .locals 3
+    .locals 1
 
     .line 14
-    new-instance v0, Ljava/util/concurrent/atomic/AtomicLong;
-
-    const-wide/16 v1, 0x1
-
-    invoke-direct {v0, v1, v2}, Ljava/util/concurrent/atomic/AtomicLong;-><init>(J)V
-
-    sput-object v0, Lgosec/mylog/Log;->index:Ljava/util/concurrent/atomic/AtomicLong;
-
-    .line 16
     new-instance v0, Ljava/lang/ThreadLocal;
 
     invoke-direct {v0}, Ljava/lang/ThreadLocal;-><init>()V
 
     sput-object v0, Lgosec/mylog/Log;->logDataLocal:Ljava/lang/ThreadLocal;
 
-    .line 17
+    .line 15
     new-instance v0, Ljava/lang/ThreadLocal;
 
     invoke-direct {v0}, Ljava/lang/ThreadLocal;-><init>()V
@@ -61,7 +50,7 @@
 .method public constructor <init>()V
     .locals 0
 
-    .line 6
+    .line 5
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 
     return-void
@@ -71,10 +60,10 @@
     .locals 1
     .param p0, "obj"    # Ljava/lang/Object;
 
-    .line 52
+    .line 46
     invoke-static {}, Lgosec/mylog/Log;->checkLocal()V
 
-    .line 53
+    .line 47
     sget-object v0, Lgosec/mylog/Log;->threadLocal:Ljava/lang/ThreadLocal;
 
     invoke-virtual {v0}, Ljava/lang/ThreadLocal;->get()Ljava/lang/Object;
@@ -83,18 +72,18 @@
 
     check-cast v0, Lgosec/mylog/DataStack;
 
-    .line 54
+    .line 48
     .local v0, "dataStack":Lgosec/mylog/DataStack;
     invoke-virtual {v0, p0}, Lgosec/mylog/DataStack;->addData(Ljava/lang/Object;)V
 
-    .line 55
+    .line 49
     return-void
 .end method
 
 .method private static checkLocal()V
     .locals 2
 
-    .line 20
+    .line 18
     sget-object v0, Lgosec/mylog/Log;->logDataLocal:Ljava/lang/ThreadLocal;
 
     invoke-virtual {v0}, Ljava/lang/ThreadLocal;->get()Ljava/lang/Object;
@@ -111,7 +100,7 @@
 
     invoke-virtual {v0, v1}, Ljava/lang/ThreadLocal;->set(Ljava/lang/Object;)V
 
-    .line 21
+    .line 19
     :cond_0
     sget-object v0, Lgosec/mylog/Log;->threadLocal:Ljava/lang/ThreadLocal;
 
@@ -129,18 +118,18 @@
 
     invoke-virtual {v0, v1}, Ljava/lang/ThreadLocal;->set(Ljava/lang/Object;)V
 
-    .line 22
+    .line 20
     :cond_1
     return-void
 .end method
 
 .method public static end()V
-    .locals 7
+    .locals 6
 
-    .line 41
+    .line 35
     invoke-static {}, Lgosec/mylog/Log;->checkLocal()V
 
-    .line 42
+    .line 36
     new-instance v0, Ljava/lang/Throwable;
 
     invoke-direct {v0}, Ljava/lang/Throwable;-><init>()V
@@ -149,7 +138,7 @@
 
     move-result-object v0
 
-    .line 43
+    .line 37
     .local v0, "stackElements":[Ljava/lang/StackTraceElement;
     const/4 v1, 0x2
 
@@ -177,7 +166,7 @@
 
     move-result-object v2
 
-    .line 44
+    .line 38
     .local v2, "end1":Ljava/lang/String;
     new-array v1, v1, [Ljava/lang/Object;
 
@@ -203,11 +192,19 @@
 
     move-result-object v1
 
-    .line 45
+    .line 39
     .local v1, "end2":Ljava/lang/String;
     new-instance v3, Ljava/lang/StringBuilder;
 
     invoke-direct {v3}, Ljava/lang/StringBuilder;-><init>()V
+
+    invoke-static {}, Lgosec/mylog/Utils;->head()Ljava/lang/String;
+
+    move-result-object v4
+
+    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v3
 
     invoke-virtual {v3, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
@@ -217,7 +214,7 @@
 
     move-result-object v3
 
-    const-string v4, "****************************************************************************************************************"
+    const-string v4, "--------------------------------------------------------------------------------------"
 
     invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
@@ -233,7 +230,7 @@
 
     move-result-object v3
 
-    .line 46
+    .line 40
     .local v3, "content":Ljava/lang/String;
     sget-object v4, Lgosec/mylog/Log;->logDataLocal:Ljava/lang/ThreadLocal;
 
@@ -243,45 +240,26 @@
 
     check-cast v4, Ljava/util/Stack;
 
-    .line 47
+    .line 41
     .local v4, "stack":Ljava/util/Stack;, "Ljava/util/Stack<Ljava/lang/String;>;"
     invoke-virtual {v4}, Ljava/util/Stack;->pop()Ljava/lang/Object;
 
-    move-result-object v6
+    move-result-object v5
 
-    check-cast v6, Ljava/lang/String;
+    check-cast v5, Ljava/lang/String;
 
-    .line 48
-    .local v6, "curHash":Ljava/lang/String;
-    invoke-static {v6, v3, v5}, Lgosec/mylog/Writer;->write(Ljava/lang/String;Ljava/lang/String;Z)V
+    .line 42
+    .local v5, "curHash":Ljava/lang/String;
+    invoke-static {v5, v3}, Lgosec/mylog/Writer;->write(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 49
+    .line 43
     return-void
-.end method
-
-.method private static getHash()Ljava/lang/String;
-    .locals 2
-
-    .line 24
-    sget-object v0, Lgosec/mylog/Log;->index:Ljava/util/concurrent/atomic/AtomicLong;
-
-    invoke-virtual {v0}, Ljava/util/concurrent/atomic/AtomicLong;->getAndIncrement()J
-
-    move-result-wide v0
-
-    invoke-static {v0, v1}, Ljava/lang/Long;->toString(J)Ljava/lang/String;
-
-    move-result-object v0
-
-    .line 25
-    .local v0, "res":Ljava/lang/String;
-    return-object v0
 .end method
 
 .method public static logInvokeStack()V
     .locals 5
 
-    .line 76
+    .line 70
     new-instance v0, Ljava/lang/Throwable;
 
     invoke-direct {v0}, Ljava/lang/Throwable;-><init>()V
@@ -290,13 +268,13 @@
 
     move-result-object v0
 
-    .line 77
+    .line 71
     .local v0, "stackElements":[Ljava/lang/StackTraceElement;
     new-instance v1, Ljava/lang/StringBuffer;
 
     invoke-direct {v1}, Ljava/lang/StringBuffer;-><init>()V
 
-    .line 79
+    .line 73
     .local v1, "sb":Ljava/lang/StringBuffer;
     invoke-static {}, Lgosec/mylog/Utils;->head()Ljava/lang/String;
 
@@ -304,15 +282,15 @@
 
     invoke-virtual {v1, v2}, Ljava/lang/StringBuffer;->append(Ljava/lang/String;)Ljava/lang/StringBuffer;
 
-    .line 80
+    .line 74
     if-eqz v0, :cond_1
 
-    .line 81
+    .line 75
     const-string v2, "invoke stack:\n"
 
     invoke-virtual {v1, v2}, Ljava/lang/StringBuffer;->append(Ljava/lang/String;)Ljava/lang/StringBuffer;
 
-    .line 82
+    .line 76
     const/4 v2, 0x1
 
     .local v2, "i":I
@@ -321,7 +299,7 @@
 
     if-ge v2, v3, :cond_0
 
-    .line 83
+    .line 77
     new-instance v3, Ljava/lang/StringBuilder;
 
     invoke-direct {v3}, Ljava/lang/StringBuilder;-><init>()V
@@ -358,7 +336,7 @@
 
     invoke-virtual {v1, v3}, Ljava/lang/StringBuffer;->append(Ljava/lang/String;)Ljava/lang/StringBuffer;
 
-    .line 82
+    .line 76
     add-int/lit8 v2, v2, 0x1
 
     goto :goto_0
@@ -367,13 +345,13 @@
     :cond_0
     goto :goto_1
 
-    .line 86
+    .line 80
     :cond_1
     const-string v2, "invoke stack here is null, unknown reason\n"
 
     invoke-virtual {v1, v2}, Ljava/lang/StringBuffer;->append(Ljava/lang/String;)Ljava/lang/StringBuffer;
 
-    .line 88
+    .line 82
     :goto_1
     new-instance v2, Ljava/lang/StringBuilder;
 
@@ -401,7 +379,7 @@
 
     move-result-object v2
 
-    .line 89
+    .line 83
     .local v2, "content":Ljava/lang/String;
     sget-object v3, Lgosec/mylog/Log;->logDataLocal:Ljava/lang/ThreadLocal;
 
@@ -417,22 +395,20 @@
 
     check-cast v3, Ljava/lang/String;
 
-    const/4 v4, 0x0
+    invoke-static {v3, v2}, Lgosec/mylog/Writer;->write(Ljava/lang/String;Ljava/lang/String;)V
 
-    invoke-static {v3, v2, v4}, Lgosec/mylog/Writer;->write(Ljava/lang/String;Ljava/lang/String;Z)V
-
-    .line 90
+    .line 84
     return-void
 .end method
 
 .method public static logNonStaticNonVoid(Ljava/lang/Object;)V
-    .locals 9
+    .locals 8
     .param p0, "result"    # Ljava/lang/Object;
 
-    .line 139
+    .line 133
     invoke-static {}, Lgosec/mylog/Log;->checkLocal()V
 
-    .line 140
+    .line 134
     sget-object v0, Lgosec/mylog/Log;->threadLocal:Ljava/lang/ThreadLocal;
 
     invoke-virtual {v0}, Ljava/lang/ThreadLocal;->get()Ljava/lang/Object;
@@ -441,13 +417,13 @@
 
     check-cast v0, Lgosec/mylog/DataStack;
 
-    .line 141
+    .line 135
     .local v0, "dataStack":Lgosec/mylog/DataStack;
     invoke-virtual {v0}, Lgosec/mylog/DataStack;->getData()Ljava/util/Stack;
 
     move-result-object v1
 
-    .line 142
+    .line 136
     .local v1, "stack":Ljava/util/Stack;, "Ljava/util/Stack<Ljava/lang/Object;>;"
     invoke-virtual {v1}, Ljava/util/Stack;->size()I
 
@@ -459,13 +435,13 @@
 
     new-array v2, v2, [Ljava/lang/Object;
 
-    .line 143
+    .line 137
     .local v2, "objs":[Ljava/lang/Object;
     invoke-virtual {v1}, Ljava/util/Stack;->pop()Ljava/lang/Object;
 
     move-result-object v4
 
-    .line 144
+    .line 138
     .local v4, "source":Ljava/lang/Object;
     const/4 v5, 0x0
 
@@ -485,27 +461,27 @@
 
     goto :goto_0
 
-    .line 145
+    .line 139
     .end local v5    # "i":I
     :cond_0
     new-instance v5, Ljava/lang/StringBuilder;
 
     invoke-direct {v5}, Ljava/lang/StringBuilder;-><init>()V
 
-    .line 146
+    .line 140
     .local v5, "sb":Ljava/lang/StringBuilder;
     const-string v6, "logNonStaticNonVoid: \n"
 
     invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 147
+    .line 141
     invoke-static {}, Lgosec/mylog/Utils;->head()Ljava/lang/String;
 
     move-result-object v6
 
     invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 148
+    .line 142
     if-nez v4, :cond_1
 
     const-string v6, "invoke source is null!\n"
@@ -514,7 +490,7 @@
 
     goto :goto_1
 
-    .line 150
+    .line 144
     :cond_1
     new-instance v6, Ljava/lang/StringBuilder;
 
@@ -564,13 +540,13 @@
 
     invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 151
+    .line 145
     :goto_1
     const-string v6, "invoke parameters: \n"
 
     invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 152
+    .line 146
     const-string v6, "para"
 
     invoke-static {v6, v2}, Lgosec/mylog/Utils;->logData(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
@@ -579,7 +555,7 @@
 
     invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 153
+    .line 147
     new-instance v6, Ljava/lang/StringBuilder;
 
     invoke-direct {v6}, Ljava/lang/StringBuilder;-><init>()V
@@ -596,9 +572,9 @@
 
     aput-object p0, v3, v7
 
-    const-string v8, "res"
+    const-string v7, "res"
 
-    invoke-static {v8, v3}, Lgosec/mylog/Utils;->handleParas(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
+    invoke-static {v7, v3}, Lgosec/mylog/Utils;->handleParas(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
 
     move-result-object v3
 
@@ -612,7 +588,7 @@
 
     invoke-virtual {v5, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 154
+    .line 148
     invoke-virtual {v5}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
 
     move-result-object v3
@@ -621,7 +597,7 @@
 
     move-result-object v3
 
-    .line 155
+    .line 149
     .local v3, "content":Ljava/lang/String;
     sget-object v6, Lgosec/mylog/Log;->logDataLocal:Ljava/lang/ThreadLocal;
 
@@ -637,19 +613,19 @@
 
     check-cast v6, Ljava/lang/String;
 
-    invoke-static {v6, v3, v7}, Lgosec/mylog/Writer;->write(Ljava/lang/String;Ljava/lang/String;Z)V
+    invoke-static {v6, v3}, Lgosec/mylog/Writer;->write(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 156
+    .line 150
     return-void
 .end method
 
 .method public static logNonStaticVoid()V
-    .locals 8
+    .locals 7
 
-    .line 118
+    .line 112
     invoke-static {}, Lgosec/mylog/Log;->checkLocal()V
 
-    .line 119
+    .line 113
     sget-object v0, Lgosec/mylog/Log;->threadLocal:Ljava/lang/ThreadLocal;
 
     invoke-virtual {v0}, Ljava/lang/ThreadLocal;->get()Ljava/lang/Object;
@@ -658,13 +634,13 @@
 
     check-cast v0, Lgosec/mylog/DataStack;
 
-    .line 120
+    .line 114
     .local v0, "dataStack":Lgosec/mylog/DataStack;
     invoke-virtual {v0}, Lgosec/mylog/DataStack;->getData()Ljava/util/Stack;
 
     move-result-object v1
 
-    .line 121
+    .line 115
     .local v1, "stack":Ljava/util/Stack;, "Ljava/util/Stack<Ljava/lang/Object;>;"
     invoke-virtual {v1}, Ljava/util/Stack;->size()I
 
@@ -674,13 +650,13 @@
 
     new-array v2, v2, [Ljava/lang/Object;
 
-    .line 122
+    .line 116
     .local v2, "objs":[Ljava/lang/Object;
     invoke-virtual {v1}, Ljava/util/Stack;->pop()Ljava/lang/Object;
 
     move-result-object v3
 
-    .line 123
+    .line 117
     .local v3, "source":Ljava/lang/Object;
     const/4 v4, 0x0
 
@@ -700,27 +676,27 @@
 
     goto :goto_0
 
-    .line 124
+    .line 118
     .end local v4    # "i":I
     :cond_0
     new-instance v4, Ljava/lang/StringBuilder;
 
     invoke-direct {v4}, Ljava/lang/StringBuilder;-><init>()V
 
-    .line 125
+    .line 119
     .local v4, "sb":Ljava/lang/StringBuilder;
     const-string v5, "logNonStaticVoid: \n"
 
     invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 126
+    .line 120
     invoke-static {}, Lgosec/mylog/Utils;->head()Ljava/lang/String;
 
     move-result-object v5
 
     invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 127
+    .line 121
     if-nez v3, :cond_1
 
     const-string v5, "invoke source is null!\n"
@@ -729,7 +705,7 @@
 
     goto :goto_1
 
-    .line 129
+    .line 123
     :cond_1
     new-instance v5, Ljava/lang/StringBuilder;
 
@@ -779,13 +755,13 @@
 
     invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 130
+    .line 124
     :goto_1
     const-string v5, "invoke parameters: \n"
 
     invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 131
+    .line 125
     const-string v5, "para"
 
     invoke-static {v5, v2}, Lgosec/mylog/Utils;->logData(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
@@ -794,12 +770,12 @@
 
     invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 132
+    .line 126
     const-string v5, "return type is void\n"
 
     invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 133
+    .line 127
     invoke-virtual {v4}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
 
     move-result-object v5
@@ -808,7 +784,7 @@
 
     move-result-object v5
 
-    .line 134
+    .line 128
     .local v5, "content":Ljava/lang/String;
     sget-object v6, Lgosec/mylog/Log;->logDataLocal:Ljava/lang/ThreadLocal;
 
@@ -824,21 +800,19 @@
 
     check-cast v6, Ljava/lang/String;
 
-    const/4 v7, 0x0
+    invoke-static {v6, v5}, Lgosec/mylog/Writer;->write(Ljava/lang/String;Ljava/lang/String;)V
 
-    invoke-static {v6, v5, v7}, Lgosec/mylog/Writer;->write(Ljava/lang/String;Ljava/lang/String;Z)V
-
-    .line 135
+    .line 129
     return-void
 .end method
 
 .method public static logParameters()V
-    .locals 7
+    .locals 6
 
-    .line 64
+    .line 58
     invoke-static {}, Lgosec/mylog/Log;->checkLocal()V
 
-    .line 65
+    .line 59
     sget-object v0, Lgosec/mylog/Log;->threadLocal:Ljava/lang/ThreadLocal;
 
     invoke-virtual {v0}, Ljava/lang/ThreadLocal;->get()Ljava/lang/Object;
@@ -847,13 +821,13 @@
 
     check-cast v0, Lgosec/mylog/DataStack;
 
-    .line 66
+    .line 60
     .local v0, "dataStack":Lgosec/mylog/DataStack;
     invoke-virtual {v0}, Lgosec/mylog/DataStack;->getData()Ljava/util/Stack;
 
     move-result-object v1
 
-    .line 67
+    .line 61
     .local v1, "stack":Ljava/util/Stack;, "Ljava/util/Stack<Ljava/lang/Object;>;"
     invoke-virtual {v1}, Ljava/util/Stack;->size()I
 
@@ -861,7 +835,7 @@
 
     new-array v2, v2, [Ljava/lang/Object;
 
-    .line 68
+    .line 62
     .local v2, "objs":[Ljava/lang/Object;
     const/4 v3, 0x0
 
@@ -881,7 +855,7 @@
 
     goto :goto_0
 
-    .line 69
+    .line 63
     .end local v3    # "i":I
     :cond_0
     new-instance v3, Ljava/lang/StringBuilder;
@@ -922,13 +896,13 @@
 
     move-result-object v3
 
-    .line 70
+    .line 64
     .local v3, "res":Ljava/lang/String;
     invoke-static {v3}, Lgosec/mylog/Utils;->endLine(Ljava/lang/String;)Ljava/lang/String;
 
     move-result-object v4
 
-    .line 71
+    .line 65
     .local v4, "content":Ljava/lang/String;
     sget-object v5, Lgosec/mylog/Log;->logDataLocal:Ljava/lang/ThreadLocal;
 
@@ -944,21 +918,19 @@
 
     check-cast v5, Ljava/lang/String;
 
-    const/4 v6, 0x0
+    invoke-static {v5, v4}, Lgosec/mylog/Writer;->write(Ljava/lang/String;Ljava/lang/String;)V
 
-    invoke-static {v5, v4, v6}, Lgosec/mylog/Writer;->write(Ljava/lang/String;Ljava/lang/String;Z)V
-
-    .line 72
+    .line 66
     return-void
 .end method
 
 .method public static logReturnVal()V
-    .locals 7
+    .locals 6
 
-    .line 94
+    .line 88
     invoke-static {}, Lgosec/mylog/Log;->checkLocal()V
 
-    .line 95
+    .line 89
     sget-object v0, Lgosec/mylog/Log;->threadLocal:Ljava/lang/ThreadLocal;
 
     invoke-virtual {v0}, Ljava/lang/ThreadLocal;->get()Ljava/lang/Object;
@@ -967,13 +939,13 @@
 
     check-cast v0, Lgosec/mylog/DataStack;
 
-    .line 96
+    .line 90
     .local v0, "dataStack":Lgosec/mylog/DataStack;
     invoke-virtual {v0}, Lgosec/mylog/DataStack;->getData()Ljava/util/Stack;
 
     move-result-object v1
 
-    .line 97
+    .line 91
     .local v1, "stack":Ljava/util/Stack;, "Ljava/util/Stack<Ljava/lang/Object;>;"
     invoke-virtual {v1}, Ljava/util/Stack;->size()I
 
@@ -981,7 +953,7 @@
 
     new-array v2, v2, [Ljava/lang/Object;
 
-    .line 98
+    .line 92
     .local v2, "objs":[Ljava/lang/Object;
     const/4 v3, 0x0
 
@@ -1001,7 +973,7 @@
 
     goto :goto_0
 
-    .line 99
+    .line 93
     .end local v3    # "i":I
     :cond_0
     new-instance v3, Ljava/lang/StringBuilder;
@@ -1042,13 +1014,13 @@
 
     move-result-object v3
 
-    .line 100
+    .line 94
     .local v3, "res":Ljava/lang/String;
     invoke-static {v3}, Lgosec/mylog/Utils;->endLine(Ljava/lang/String;)Ljava/lang/String;
 
     move-result-object v4
 
-    .line 101
+    .line 95
     .local v4, "content":Ljava/lang/String;
     sget-object v5, Lgosec/mylog/Log;->logDataLocal:Ljava/lang/ThreadLocal;
 
@@ -1064,22 +1036,20 @@
 
     check-cast v5, Ljava/lang/String;
 
-    const/4 v6, 0x0
+    invoke-static {v5, v4}, Lgosec/mylog/Writer;->write(Ljava/lang/String;Ljava/lang/String;)V
 
-    invoke-static {v5, v4, v6}, Lgosec/mylog/Writer;->write(Ljava/lang/String;Ljava/lang/String;Z)V
-
-    .line 102
+    .line 96
     return-void
 .end method
 
 .method public static logStaticNonVoid(Ljava/lang/Object;)V
-    .locals 8
+    .locals 7
     .param p0, "obj"    # Ljava/lang/Object;
 
-    .line 177
+    .line 171
     invoke-static {}, Lgosec/mylog/Log;->checkLocal()V
 
-    .line 178
+    .line 172
     sget-object v0, Lgosec/mylog/Log;->threadLocal:Ljava/lang/ThreadLocal;
 
     invoke-virtual {v0}, Ljava/lang/ThreadLocal;->get()Ljava/lang/Object;
@@ -1088,13 +1058,13 @@
 
     check-cast v0, Lgosec/mylog/DataStack;
 
-    .line 179
+    .line 173
     .local v0, "dataStack":Lgosec/mylog/DataStack;
     invoke-virtual {v0}, Lgosec/mylog/DataStack;->getData()Ljava/util/Stack;
 
     move-result-object v1
 
-    .line 180
+    .line 174
     .local v1, "stack":Ljava/util/Stack;, "Ljava/util/Stack<Ljava/lang/Object;>;"
     invoke-virtual {v1}, Ljava/util/Stack;->size()I
 
@@ -1102,7 +1072,7 @@
 
     new-array v2, v2, [Ljava/lang/Object;
 
-    .line 181
+    .line 175
     .local v2, "objs":[Ljava/lang/Object;
     const/4 v3, 0x0
 
@@ -1122,32 +1092,32 @@
 
     goto :goto_0
 
-    .line 182
+    .line 176
     .end local v3    # "i":I
     :cond_0
     new-instance v3, Ljava/lang/StringBuilder;
 
     invoke-direct {v3}, Ljava/lang/StringBuilder;-><init>()V
 
-    .line 183
+    .line 177
     .local v3, "sb":Ljava/lang/StringBuilder;
     const-string v4, "logStaticNonVoid: \n"
 
     invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 184
+    .line 178
     invoke-static {}, Lgosec/mylog/Utils;->head()Ljava/lang/String;
 
     move-result-object v4
 
     invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 185
+    .line 179
     const-string v4, "invoke parameters: \n"
 
     invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 186
+    .line 180
     const-string v4, "para"
 
     invoke-static {v4, v2}, Lgosec/mylog/Utils;->logData(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
@@ -1156,7 +1126,7 @@
 
     invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 187
+    .line 181
     new-instance v4, Ljava/lang/StringBuilder;
 
     invoke-direct {v4}, Ljava/lang/StringBuilder;-><init>()V
@@ -1175,9 +1145,9 @@
 
     aput-object p0, v5, v6
 
-    const-string v7, "res"
+    const-string v6, "res"
 
-    invoke-static {v7, v5}, Lgosec/mylog/Utils;->handleParas(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
+    invoke-static {v6, v5}, Lgosec/mylog/Utils;->handleParas(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
 
     move-result-object v5
 
@@ -1191,7 +1161,7 @@
 
     invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 188
+    .line 182
     invoke-virtual {v3}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
 
     move-result-object v4
@@ -1200,7 +1170,7 @@
 
     move-result-object v4
 
-    .line 189
+    .line 183
     .local v4, "content":Ljava/lang/String;
     sget-object v5, Lgosec/mylog/Log;->logDataLocal:Ljava/lang/ThreadLocal;
 
@@ -1216,19 +1186,19 @@
 
     check-cast v5, Ljava/lang/String;
 
-    invoke-static {v5, v4, v6}, Lgosec/mylog/Writer;->write(Ljava/lang/String;Ljava/lang/String;Z)V
+    invoke-static {v5, v4}, Lgosec/mylog/Writer;->write(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 190
+    .line 184
     return-void
 .end method
 
 .method public static logStaticVoid()V
-    .locals 7
+    .locals 6
 
-    .line 160
+    .line 154
     invoke-static {}, Lgosec/mylog/Log;->checkLocal()V
 
-    .line 161
+    .line 155
     sget-object v0, Lgosec/mylog/Log;->threadLocal:Ljava/lang/ThreadLocal;
 
     invoke-virtual {v0}, Ljava/lang/ThreadLocal;->get()Ljava/lang/Object;
@@ -1237,13 +1207,13 @@
 
     check-cast v0, Lgosec/mylog/DataStack;
 
-    .line 162
+    .line 156
     .local v0, "dataStack":Lgosec/mylog/DataStack;
     invoke-virtual {v0}, Lgosec/mylog/DataStack;->getData()Ljava/util/Stack;
 
     move-result-object v1
 
-    .line 163
+    .line 157
     .local v1, "stack":Ljava/util/Stack;, "Ljava/util/Stack<Ljava/lang/Object;>;"
     invoke-virtual {v1}, Ljava/util/Stack;->size()I
 
@@ -1251,7 +1221,7 @@
 
     new-array v2, v2, [Ljava/lang/Object;
 
-    .line 164
+    .line 158
     .local v2, "objs":[Ljava/lang/Object;
     const/4 v3, 0x0
 
@@ -1271,32 +1241,32 @@
 
     goto :goto_0
 
-    .line 165
+    .line 159
     .end local v3    # "i":I
     :cond_0
     new-instance v3, Ljava/lang/StringBuilder;
 
     invoke-direct {v3}, Ljava/lang/StringBuilder;-><init>()V
 
-    .line 166
+    .line 160
     .local v3, "sb":Ljava/lang/StringBuilder;
     const-string v4, "logStaticVoid: \n"
 
     invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 167
+    .line 161
     invoke-static {}, Lgosec/mylog/Utils;->head()Ljava/lang/String;
 
     move-result-object v4
 
     invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 168
+    .line 162
     const-string v4, "invoke parameters: \n"
 
     invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 169
+    .line 163
     const-string v4, "para"
 
     invoke-static {v4, v2}, Lgosec/mylog/Utils;->logData(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
@@ -1305,12 +1275,12 @@
 
     invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 170
+    .line 164
     const-string v4, "return type is void\n"
 
     invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 171
+    .line 165
     invoke-virtual {v3}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
 
     move-result-object v4
@@ -1319,7 +1289,7 @@
 
     move-result-object v4
 
-    .line 172
+    .line 166
     .local v4, "content":Ljava/lang/String;
     sget-object v5, Lgosec/mylog/Log;->logDataLocal:Ljava/lang/ThreadLocal;
 
@@ -1335,21 +1305,19 @@
 
     check-cast v5, Ljava/lang/String;
 
-    const/4 v6, 0x0
+    invoke-static {v5, v4}, Lgosec/mylog/Writer;->write(Ljava/lang/String;Ljava/lang/String;)V
 
-    invoke-static {v5, v4, v6}, Lgosec/mylog/Writer;->write(Ljava/lang/String;Ljava/lang/String;Z)V
-
-    .line 173
+    .line 167
     return-void
 .end method
 
 .method public static logVariables()V
-    .locals 7
+    .locals 6
 
-    .line 106
+    .line 100
     invoke-static {}, Lgosec/mylog/Log;->checkLocal()V
 
-    .line 107
+    .line 101
     sget-object v0, Lgosec/mylog/Log;->threadLocal:Ljava/lang/ThreadLocal;
 
     invoke-virtual {v0}, Ljava/lang/ThreadLocal;->get()Ljava/lang/Object;
@@ -1358,13 +1326,13 @@
 
     check-cast v0, Lgosec/mylog/DataStack;
 
-    .line 108
+    .line 102
     .local v0, "dataStack":Lgosec/mylog/DataStack;
     invoke-virtual {v0}, Lgosec/mylog/DataStack;->getData()Ljava/util/Stack;
 
     move-result-object v1
 
-    .line 109
+    .line 103
     .local v1, "stack":Ljava/util/Stack;, "Ljava/util/Stack<Ljava/lang/Object;>;"
     invoke-virtual {v1}, Ljava/util/Stack;->size()I
 
@@ -1372,7 +1340,7 @@
 
     new-array v2, v2, [Ljava/lang/Object;
 
-    .line 110
+    .line 104
     .local v2, "objs":[Ljava/lang/Object;
     const/4 v3, 0x0
 
@@ -1392,7 +1360,7 @@
 
     goto :goto_0
 
-    .line 111
+    .line 105
     .end local v3    # "i":I
     :cond_0
     new-instance v3, Ljava/lang/StringBuilder;
@@ -1433,13 +1401,13 @@
 
     move-result-object v3
 
-    .line 112
+    .line 106
     .local v3, "res":Ljava/lang/String;
     invoke-static {v3}, Lgosec/mylog/Utils;->endLine(Ljava/lang/String;)Ljava/lang/String;
 
     move-result-object v4
 
-    .line 113
+    .line 107
     .local v4, "content":Ljava/lang/String;
     sget-object v5, Lgosec/mylog/Log;->logDataLocal:Ljava/lang/ThreadLocal;
 
@@ -1455,21 +1423,19 @@
 
     check-cast v5, Ljava/lang/String;
 
-    const/4 v6, 0x0
+    invoke-static {v5, v4}, Lgosec/mylog/Writer;->write(Ljava/lang/String;Ljava/lang/String;)V
 
-    invoke-static {v5, v4, v6}, Lgosec/mylog/Writer;->write(Ljava/lang/String;Ljava/lang/String;Z)V
-
-    .line 114
+    .line 108
     return-void
 .end method
 
 .method public static start()V
     .locals 7
 
-    .line 29
+    .line 23
     invoke-static {}, Lgosec/mylog/Log;->checkLocal()V
 
-    .line 30
+    .line 24
     new-instance v0, Ljava/lang/Throwable;
 
     invoke-direct {v0}, Ljava/lang/Throwable;-><init>()V
@@ -1478,137 +1444,142 @@
 
     move-result-object v0
 
-    .line 31
+    .line 25
     .local v0, "stackElements":[Ljava/lang/StackTraceElement;
-    const/4 v1, 0x2
+    invoke-static {}, Lgosec/mylog/IdWorker;->getId()J
 
-    new-array v2, v1, [Ljava/lang/Object;
+    move-result-wide v1
 
-    const/4 v3, 0x1
+    invoke-static {v1, v2}, Ljava/lang/Long;->toString(J)Ljava/lang/String;
 
-    aget-object v4, v0, v3
+    move-result-object v1
 
-    invoke-virtual {v4}, Ljava/lang/StackTraceElement;->getClassName()Ljava/lang/String;
+    .line 26
+    .local v1, "hash":Ljava/lang/String;
+    const/4 v2, 0x2
 
-    move-result-object v4
+    new-array v3, v2, [Ljava/lang/Object;
 
-    const/4 v5, 0x0
+    const/4 v4, 0x1
 
-    aput-object v4, v2, v5
+    aget-object v5, v0, v4
 
-    aget-object v4, v0, v3
+    invoke-virtual {v5}, Ljava/lang/StackTraceElement;->getClassName()Ljava/lang/String;
 
-    invoke-virtual {v4}, Ljava/lang/StackTraceElement;->getMethodName()Ljava/lang/String;
+    move-result-object v5
 
-    move-result-object v4
+    const/4 v6, 0x0
 
-    aput-object v4, v2, v3
+    aput-object v5, v3, v6
 
-    const-string v4, "Method Name: %s.%s\n"
+    aget-object v5, v0, v4
+
+    invoke-virtual {v5}, Ljava/lang/StackTraceElement;->getMethodName()Ljava/lang/String;
+
+    move-result-object v5
+
+    aput-object v5, v3, v4
+
+    const-string v5, "Method Name: %s.%s\n"
+
+    invoke-static {v5, v3}, Ljava/lang/String;->format(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
+
+    move-result-object v3
+
+    .line 27
+    .local v3, "head1":Ljava/lang/String;
+    new-array v2, v2, [Ljava/lang/Object;
+
+    invoke-static {}, Lgosec/mylog/Utils;->getCurrentTimeMillis()Ljava/lang/String;
+
+    move-result-object v5
+
+    aput-object v5, v2, v6
+
+    invoke-static {}, Lgosec/mylog/Utils;->getCurrentTimeFormat()Ljava/lang/String;
+
+    move-result-object v5
+
+    aput-object v5, v2, v4
+
+    const-string v4, "Method Start Time: %s %s\n"
 
     invoke-static {v4, v2}, Ljava/lang/String;->format(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
 
     move-result-object v2
 
+    .line 28
+    .local v2, "head2":Ljava/lang/String;
+    new-instance v4, Ljava/lang/StringBuilder;
+
+    invoke-direct {v4}, Ljava/lang/StringBuilder;-><init>()V
+
+    invoke-static {}, Lgosec/mylog/Utils;->head()Ljava/lang/String;
+
+    move-result-object v5
+
+    invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v4
+
+    invoke-virtual {v4, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v4
+
+    invoke-virtual {v4, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v4
+
+    const-string v5, "--------------------------------------------------------------------------------------"
+
+    invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v4
+
+    const-string v5, "\n"
+
+    invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v4
+
+    invoke-virtual {v4}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v4
+
+    .line 29
+    .local v4, "content":Ljava/lang/String;
+    sget-object v5, Lgosec/mylog/Log;->logDataLocal:Ljava/lang/ThreadLocal;
+
+    invoke-virtual {v5}, Ljava/lang/ThreadLocal;->get()Ljava/lang/Object;
+
+    move-result-object v5
+
+    check-cast v5, Ljava/util/Stack;
+
+    .line 30
+    .local v5, "stack":Ljava/util/Stack;, "Ljava/util/Stack<Ljava/lang/String;>;"
+    invoke-virtual {v5, v1}, Ljava/util/Stack;->push(Ljava/lang/Object;)Ljava/lang/Object;
+
+    .line 31
+    invoke-virtual {v5}, Ljava/util/Stack;->peek()Ljava/lang/Object;
+
+    move-result-object v6
+
+    check-cast v6, Ljava/lang/String;
+
+    invoke-static {v6, v4}, Lgosec/mylog/Writer;->write(Ljava/lang/String;Ljava/lang/String;)V
+
     .line 32
-    .local v2, "head1":Ljava/lang/String;
-    new-array v1, v1, [Ljava/lang/Object;
-
-    invoke-static {}, Lgosec/mylog/Utils;->getCurrentTimeMillis()Ljava/lang/String;
-
-    move-result-object v4
-
-    aput-object v4, v1, v5
-
-    invoke-static {}, Lgosec/mylog/Utils;->getCurrentTimeFormat()Ljava/lang/String;
-
-    move-result-object v4
-
-    aput-object v4, v1, v3
-
-    const-string v3, "Method Start Time: %s %s\n"
-
-    invoke-static {v3, v1}, Ljava/lang/String;->format(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;
-
-    move-result-object v1
-
-    .line 33
-    .local v1, "head2":Ljava/lang/String;
-    new-instance v3, Ljava/lang/StringBuilder;
-
-    invoke-direct {v3}, Ljava/lang/StringBuilder;-><init>()V
-
-    invoke-virtual {v3, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v3
-
-    invoke-virtual {v3, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v3
-
-    const-string v4, "-----------------------------------------"
-
-    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v3
-
-    const-string v4, "\n"
-
-    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v3
-
-    invoke-virtual {v3}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-
-    move-result-object v3
-
-    .line 34
-    .local v3, "content":Ljava/lang/String;
-    sget-object v4, Lgosec/mylog/Log;->logDataLocal:Ljava/lang/ThreadLocal;
-
-    invoke-virtual {v4}, Ljava/lang/ThreadLocal;->get()Ljava/lang/Object;
-
-    move-result-object v4
-
-    check-cast v4, Ljava/util/Stack;
-
-    .line 35
-    .local v4, "stack":Ljava/util/Stack;, "Ljava/util/Stack<Ljava/lang/String;>;"
-    invoke-static {}, Lgosec/mylog/Log;->getHash()Ljava/lang/String;
-
-    move-result-object v6
-
-    invoke-virtual {v4, v6}, Ljava/util/Stack;->push(Ljava/lang/Object;)Ljava/lang/Object;
-
-    .line 36
-    invoke-virtual {v4}, Ljava/util/Stack;->peek()Ljava/lang/Object;
-
-    move-result-object v6
-
-    check-cast v6, Ljava/lang/String;
-
-    invoke-static {v6}, Lgosec/mylog/Writer;->deleteFileByFileName(Ljava/lang/String;)V
-
-    .line 37
-    invoke-virtual {v4}, Ljava/util/Stack;->peek()Ljava/lang/Object;
-
-    move-result-object v6
-
-    check-cast v6, Ljava/lang/String;
-
-    invoke-static {v6, v3, v5}, Lgosec/mylog/Writer;->write(Ljava/lang/String;Ljava/lang/String;Z)V
-
-    .line 38
     return-void
 .end method
 
 .method public static stopAdding()V
     .locals 1
 
-    .line 58
+    .line 52
     invoke-static {}, Lgosec/mylog/Log;->checkLocal()V
 
-    .line 59
+    .line 53
     sget-object v0, Lgosec/mylog/Log;->threadLocal:Ljava/lang/ThreadLocal;
 
     invoke-virtual {v0}, Ljava/lang/ThreadLocal;->get()Ljava/lang/Object;
@@ -1617,10 +1588,10 @@
 
     check-cast v0, Lgosec/mylog/DataStack;
 
-    .line 60
+    .line 54
     .local v0, "dataStack":Lgosec/mylog/DataStack;
     invoke-virtual {v0}, Lgosec/mylog/DataStack;->stopAdding()V
 
-    .line 61
+    .line 55
     return-void
 .end method

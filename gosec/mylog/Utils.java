@@ -7,7 +7,7 @@ import java.util.Set;
 public class Utils {
     private static final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");//设置日期格式
     protected static final String longLine = "****************************************************************************************************************";
-    protected static final String shortLine = "-----------------------------------------";
+    protected static final String line = "--------------------------------------------------------------------------------------";
     private static final Set<String> primitiveTypeSet = new HashSet<>();
 
     static {
@@ -59,7 +59,7 @@ public class Utils {
     protected static String endLine(String str) {
         return str +
                 "End Time: " + System.currentTimeMillis() + " " + df.format(System.currentTimeMillis()) + "\n" +
-                shortLine + "\n";
+                line + "\n";
     }
 
     protected static String logData(String type, Object... objs) {

@@ -6,6 +6,8 @@
 # static fields
 .field private static final df:Ljava/text/SimpleDateFormat;
 
+.field protected static final line:Ljava/lang/String; = "--------------------------------------------------------------------------------------"
+
 .field protected static final longLine:Ljava/lang/String; = "****************************************************************************************************************"
 
 .field private static final primitiveTypeSet:Ljava/util/Set;
@@ -17,8 +19,6 @@
         }
     .end annotation
 .end field
-
-.field protected static final shortLine:Ljava/lang/String; = "-----------------------------------------"
 
 
 # direct methods
@@ -192,7 +192,7 @@
 
     move-result-object v0
 
-    const-string v2, "-----------------------------------------"
+    const-string v2, "--------------------------------------------------------------------------------------"
 
     invoke-virtual {v0, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
