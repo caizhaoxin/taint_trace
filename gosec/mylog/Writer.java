@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Writer {
     public static String packageName = "cn.demo.demo";
@@ -14,7 +16,7 @@ public class Writer {
     public static String fileName = "data.txt";
     public static BufferedWriter bufferedWriter;
     public static String dataLogFileName;
-    private static final int bufSize = 1024;
+    private static final int bufSize = (int) Math.pow(1024, 2);
 
 
     static {
@@ -37,15 +39,24 @@ public class Writer {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+        //flush
+        new Timer("writer looper").schedule(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    bufferedWriter.flush();
+//                    System.out.println("flush");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, 1000, 1000);
     }
 
-    public synchronized static void write(String hash, String content) {
-//        System.out.println(hash+" "+content);
+    public static void write(String hash, String content) {
         try {
             String hashHead = String.format("Hash: %s\n", hash);
             bufferedWriter.write(hashHead + content);
-            // 临时
-//            bufferedWriter.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }

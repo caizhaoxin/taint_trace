@@ -1,7 +1,6 @@
 package gosec.mylog;
 
 import java.util.Stack;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class Log {
     /**
@@ -26,7 +25,7 @@ public class Log {
         String hash = Long.toString(IdWorker.getId());
         String head1 = String.format("Method Name: %s.%s\n", stackElements[1].getClassName(), stackElements[1].getMethodName());
         String head2 = String.format("Method Start Time: %s %s\n", Utils.getCurrentTimeMillis(), Utils.getCurrentTimeFormat());
-        String content = Utils.head() + head1 + head2 + Utils.line + "\n";
+        String content = "start:\n"+Utils.head() + head1 + head2 + Utils.line + "\n";
         Stack<String> stack = logDataLocal.get();
         stack.push(hash);
         Writer.write(stack.peek(), content);
@@ -37,7 +36,7 @@ public class Log {
         StackTraceElement[] stackElements = new Throwable().getStackTrace();
         String end1 = String.format("Method End Time: %s %s\n", Utils.getCurrentTimeMillis(), Utils.getCurrentTimeFormat());
         String end2 = String.format("Method Name: %s.%s End!\n", stackElements[1].getClassName(), stackElements[1].getMethodName());
-        String content = Utils.head() + end1 + end2 + Utils.line + "\n";
+        String content = "end:\n"+Utils.head() + end1 + end2 + Utils.line + "\n";
         Stack<String> stack = logDataLocal.get();
         String curHash = stack.pop();
         Writer.write(curHash, content);

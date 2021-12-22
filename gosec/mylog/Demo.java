@@ -69,7 +69,7 @@ public class Demo {
 
     public static void fun() {
         long time = System.currentTimeMillis();
-        for (int i=0; i<50000; i++) {
+        for (int i=0; i<0; i++) {
             {
                 // 参数
                 int a = 123;

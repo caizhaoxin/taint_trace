@@ -198,6 +198,12 @@
 
     invoke-direct {v3}, Ljava/lang/StringBuilder;-><init>()V
 
+    const-string v4, "end:\n"
+
+    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v3
+
     invoke-static {}, Lgosec/mylog/Utils;->head()Ljava/lang/String;
 
     move-result-object v4
@@ -1513,6 +1519,12 @@
     new-instance v4, Ljava/lang/StringBuilder;
 
     invoke-direct {v4}, Ljava/lang/StringBuilder;-><init>()V
+
+    const-string v5, "start:\n"
+
+    invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v4
 
     invoke-static {}, Lgosec/mylog/Utils;->head()Ljava/lang/String;
 
